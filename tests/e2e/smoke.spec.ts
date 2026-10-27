@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
-async function runTenWords(page: Page) {
+async function runTenWords(page: Page, options: { delay?: number } = {}) {
   await page.goto('/');
   await page.getByRole('button', { name: 'Words', exact: true }).click();
   await page.getByRole('button', { name: '10', exact: true }).click();
@@ -11,7 +11,10 @@ async function runTenWords(page: Page) {
   expect(words).toHaveLength(10);
 
   await page.getByLabel('Typing input').focus();
-  await page.keyboard.type(words.join(' '));
+  await page.keyboard.type(
+    words.join(' '),
+    options.delay === undefined ? undefined : { delay: options.delay },
+  );
 
   await expect(page.getByTestId('result-panel')).toBeVisible();
   await expect(page.getByTestId('save-status')).toHaveAttribute('data-save-status', 'saved');
@@ -118,6 +121,27 @@ test('history rows fit a phone viewport', async ({ page }) => {
   expect(box).not.toBeNull();
   expect(box!.x).toBeGreaterThanOrEqual(0);
   expect(box!.x + box!.width).toBeLessThanOrEqual(390);
+});
+
+test('a history row opens the run detail with metrics and a personal best', async ({ page }) => {
+  // A human-paced run clears the one-second exclusion threshold.
+  await runTenWords(page, { delay: 40 });
+
+  await page.getByRole('link', { name: 'History', exact: true }).click();
+  await page.getByRole('link', { name: '10 words', exact: true }).click();
+
+  await expect(page).toHaveURL(/\/results\/[^/]+$/);
+  await expect(page.getByRole('heading', { name: /run detail/i })).toBeVisible();
+  await expect(page.getByText('Net WPM')).toBeVisible();
+  await expect(page.getByText('Raw WPM')).toBeVisible();
+  await expect(page.getByText('Personal best for this category.')).toBeVisible();
+});
+
+test('a missing run shows a recoverable state', async ({ page }) => {
+  await page.goto('/results/does-not-exist');
+
+  await expect(page.getByRole('heading', { name: /run not found/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /local history/i })).toBeVisible();
 });
 
 test('an exported backup imports into a fresh browser', async ({ page, browser }) => {

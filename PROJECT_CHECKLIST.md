@@ -77,11 +77,11 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 
 ### Results and persistence
 
-- [ ] Results route `/results/:id`
-- [ ] Net/raw WPM, accuracy, consistency, char stats, config, timestamp
-- [ ] Personal-best comparison
-- [ ] Missing-result state
-- [ ] Refresh recovery
+- [x] Results route `/results/:id`
+- [x] Net/raw WPM, accuracy, consistency, char stats, config, timestamp
+- [x] Personal-best comparison
+- [x] Missing-result state
+- [x] Refresh recovery
 - [x] Settings repository + localStorage
 - [ ] Settings schema versioning/migration
 - [x] Result repository + Dexie
@@ -99,7 +99,8 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [ ] E2E: backspace correction
 - [ ] E2E: restart before completion
 - [ ] E2E: timer boundary
-- [ ] E2E: refresh recovery
+- [x] E2E: refresh recovery
+- [x] E2E: result detail + personal best
 - [ ] E2E: responsive layout + keyboard navigation
 - [ ] Accessibility smoke (axe)
 - [ ] Reduced-motion check

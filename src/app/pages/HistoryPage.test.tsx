@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_TIMED_CONFIG } from '@/engine/config';
@@ -49,11 +50,19 @@ function createRepository(items: TestResult[] = [makeResult()]) {
   return { list, delete: remove };
 }
 
+function renderPage(repository: ReturnType<typeof createRepository>) {
+  return render(
+    <MemoryRouter>
+      <HistoryPage repository={repository} />
+    </MemoryRouter>,
+  );
+}
+
 describe('history page', () => {
   it('lists saved runs with their headline metrics', async () => {
     const repository = createRepository();
 
-    render(<HistoryPage repository={repository} />);
+    renderPage(repository);
 
     expect(await screen.findByText('30 seconds')).toBeInTheDocument();
     expect(screen.getByText('61.5')).toBeInTheDocument();
@@ -66,10 +75,20 @@ describe('history page', () => {
     });
   });
 
+  it('links each run to its detail page', async () => {
+    const repository = createRepository();
+
+    renderPage(repository);
+
+    const link = await screen.findByRole('link', { name: '30 seconds' });
+
+    expect(link).toHaveAttribute('href', '/results/result-1');
+  });
+
   it('shows an empty state when nothing matches', async () => {
     const repository = createRepository([]);
 
-    render(<HistoryPage repository={repository} />);
+    renderPage(repository);
 
     expect(await screen.findByText(/no runs match yet/i)).toBeInTheDocument();
   });
@@ -81,7 +100,11 @@ describe('history page', () => {
       .mockRejectedValueOnce(new Error('blocked'))
       .mockResolvedValueOnce({ items: [makeResult()], total: 1, hasMore: false });
 
-    render(<HistoryPage repository={{ list, delete: async () => {} }} />);
+    render(
+      <MemoryRouter>
+        <HistoryPage repository={{ list, delete: async () => {} }} />
+      </MemoryRouter>,
+    );
 
     expect(await screen.findByText(/could not be opened/i)).toBeInTheDocument();
 
@@ -95,7 +118,7 @@ describe('history page', () => {
     const user = userEvent.setup();
     const repository = createRepository();
 
-    render(<HistoryPage repository={repository} />);
+    renderPage(repository);
     await screen.findByText('30 seconds');
 
     await user.click(screen.getByLabelText('Show excluded runs'));
@@ -112,7 +135,7 @@ describe('history page', () => {
     const user = userEvent.setup();
     const repository = createRepository();
 
-    render(<HistoryPage repository={repository} />);
+    renderPage(repository);
     await screen.findByText('30 seconds');
 
     await user.selectOptions(screen.getByLabelText('Filter by mode'), 'words');
@@ -131,7 +154,7 @@ describe('history page', () => {
     const repository = createRepository();
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
 
-    render(<HistoryPage repository={repository} />);
+    renderPage(repository);
     await screen.findByText('30 seconds');
 
     await user.click(screen.getByRole('button', { name: /delete run/i }));

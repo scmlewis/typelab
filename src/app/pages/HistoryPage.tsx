@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trash2 } from 'lucide-react';
+import { Link } from 'react-router';
 
 import type { TestMode } from '@/engine/types';
 import { getResultRepository } from '@/features/history/resultRepository';
@@ -180,7 +181,12 @@ export function HistoryPage({ repository }: HistoryPageProps) {
               key={result.id}
             >
               <div>
-                <p className="text-sm font-medium">{describeResultMode(result)}</p>
+                <Link
+                  className="text-sm font-medium underline-offset-4 hover:underline"
+                  to={`/results/${result.id}`}
+                >
+                  {describeResultMode(result)}
+                </Link>
                 <p className="mt-1 text-xs text-ink-muted">
                   {formatLanguage(result.language)} · {formatTimestamp(result.completedAt)}
                 </p>
