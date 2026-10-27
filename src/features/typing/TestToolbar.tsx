@@ -1,10 +1,12 @@
 import { RotateCcw } from 'lucide-react';
 
-import { DEFAULT_TIMED_CONFIG, DEFAULT_WORDS_CONFIG } from '@/engine/config';
+import {
+  DEFAULT_TIMED_CONFIG,
+  DEFAULT_WORDS_CONFIG,
+  DURATION_OPTIONS,
+  WORD_COUNT_OPTIONS,
+} from '@/engine/config';
 import type { DurationSeconds, TestConfig, WordCount } from '@/engine/types';
-
-const DURATIONS: readonly DurationSeconds[] = [15, 30, 60, 120];
-const WORD_COUNTS: readonly WordCount[] = [10, 25, 50, 100];
 
 interface TestToolbarProps {
   config: TestConfig;
@@ -102,7 +104,7 @@ export function TestToolbar({ config, disabled, onChange, onRestart }: TestToolb
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mt-0 sm:contents">
         {config.mode === 'timed' ? (
           <div aria-label="Duration" className="flex items-center gap-1 sm:order-2" role="group">
-            {DURATIONS.map((duration) => (
+            {DURATION_OPTIONS.map((duration) => (
               <OptionButton
                 active={config.durationSeconds === duration}
                 disabled={disabled}
@@ -116,7 +118,7 @@ export function TestToolbar({ config, disabled, onChange, onRestart }: TestToolb
           </div>
         ) : (
           <div aria-label="Word count" className="flex items-center gap-1 sm:order-2" role="group">
-            {WORD_COUNTS.map((count) => (
+            {WORD_COUNT_OPTIONS.map((count) => (
               <OptionButton
                 active={config.wordCount === count}
                 disabled={disabled}

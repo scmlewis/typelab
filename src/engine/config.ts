@@ -1,8 +1,17 @@
 import { z } from 'zod';
 
-import type { TestConfig, TimedTestConfig, WordsTestConfig } from '@/engine/types';
+import type {
+  DurationSeconds,
+  TestConfig,
+  TimedTestConfig,
+  WordCount,
+  WordsTestConfig,
+} from '@/engine/types';
 
 export type { TestConfig } from '@/engine/types';
+
+export const DURATION_OPTIONS: readonly DurationSeconds[] = [15, 30, 60, 120];
+export const WORD_COUNT_OPTIONS: readonly WordCount[] = [10, 25, 50, 100];
 
 const durationSchema = z.union([z.literal(15), z.literal(30), z.literal(60), z.literal(120)]);
 const wordCountSchema = z.union([z.literal(10), z.literal(25), z.literal(50), z.literal(100)]);

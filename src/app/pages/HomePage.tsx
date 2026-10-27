@@ -1,6 +1,9 @@
 import { TypingTest } from '@/features/typing/TypingTest';
+import { useSettings } from '@/features/settings/settingsContext';
 
 export function HomePage() {
+  const { status } = useSettings();
+
   return (
     <section aria-labelledby="bench-title">
       <div className="flex flex-wrap items-end justify-between gap-6">
@@ -24,7 +27,18 @@ export function HomePage() {
         </p>
       </div>
 
-      <TypingTest />
+      {status === 'loading' ? (
+        <div
+          aria-busy="true"
+          className="mt-6 rounded-card border border-line bg-surface p-8 shadow-card sm:mt-8"
+        >
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-ink-muted">
+            Preparing the bench…
+          </p>
+        </div>
+      ) : (
+        <TypingTest />
+      )}
     </section>
   );
 }
