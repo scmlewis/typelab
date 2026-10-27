@@ -35,10 +35,10 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 
 ### Engine
 
-- [ ] `TestConfig` Zod schema + defaults + category key
-- [ ] English 200 and English 1k word lists with provenance
-- [ ] Seeded PRNG + prompt generator
-- [ ] Punctuation and numbers transforms
+- [x] `TestConfig` Zod schema + defaults + category key
+- [x] English 200 and English 1k word lists with provenance
+- [x] Seeded PRNG + prompt generator
+- [x] Punctuation and numbers transforms
 - [ ] `Clock` interface + fake clock
 - [ ] Engine state machine (`idle/running/completed/failed/cancelled`)
 - [ ] Timed completion at the boundary

@@ -30,6 +30,7 @@ See [ADR 0005](docs/decisions/0005-local-only-v1.md) for the decision and its co
 | [Risk register](docs/phase-0/04-risk-register.md) | Risks, likelihood/impact, mitigations |
 | [Implementation plan](docs/phase-0/05-implementation-plan.md) | Prioritised phases, tasks, exit criteria |
 | [Project checklist](PROJECT_CHECKLIST.md) | Living delivery checklist |
+| [Third-party notices](docs/third-party-notices.md) | Word-list source and license |
 
 Architecture decision records live in [`docs/decisions/`](docs/decisions/).
 
