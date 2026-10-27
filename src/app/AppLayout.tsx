@@ -41,14 +41,14 @@ export function AppLayout() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-5 pb-20 pt-10 sm:px-8 sm:pt-16" id="main">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-5 pb-20 pt-6 sm:px-8 sm:pt-16" id="main">
         <Outlet />
       </main>
 
       <footer className="border-t border-line/80">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-5 py-5 text-xs text-ink-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p>Local-only by design. No account. No tracking.</p>
-          <p className="font-mono uppercase tracking-[0.16em]">Phase 1 / foundation</p>
+          <p className="font-mono uppercase tracking-[0.16em]">Phase 1 / local build</p>
         </div>
       </footer>
     </div>

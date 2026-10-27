@@ -59,21 +59,21 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] `input`/`beforeinput` handling
 - [x] Composition/IME handling
 - [x] Backspace dedupe
-- [ ] Space/backspace scroll prevention
+- [x] Space/backspace scroll prevention
 - [x] Shortcut filtering
 - [x] Focus-loss recovery
 - [x] Paste rejection
-- [ ] Mobile keyboard path
-- [ ] External store + selectors
-- [ ] rAF ticker + 10 Hz stats quantisation
-- [ ] Typing surface with character feedback
-- [ ] Caret
-- [ ] Live timer/WPM/raw/accuracy
-- [ ] Config bar (mode, duration/words, language, punctuation, numbers)
-- [ ] Restart
-- [ ] Focus overlay
+- [x] Mobile keyboard path
+- [x] External store + selectors
+- [x] rAF ticker + 10 Hz stats quantisation
+- [x] Typing surface with character feedback
+- [x] Caret
+- [x] Live timer/WPM/raw/accuracy
+- [x] Config bar (mode, duration/words, language, punctuation, numbers)
+- [x] Restart
+- [x] Focus overlay
 - [ ] Light/dark basic themes
-- [ ] Responsive layout
+- [x] Responsive layout
 
 ### Results and persistence
 

@@ -5,15 +5,15 @@ import { describe, expect, it } from 'vitest';
 import { AppRoutes } from '@/app/AppRoutes';
 
 describe('app shell', () => {
-  it('renders the local-first home page', () => {
+  it('renders the typing bench and input receptor', () => {
     render(
       <MemoryRouter>
         <AppRoutes />
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('heading', { name: /type with intent/i })).toBeInTheDocument();
-    expect(screen.getByText(/engine build in progress/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /the typing bench/i })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /typing input/i })).toBeInTheDocument();
     expect(screen.getByText(/local-only by design/i)).toBeInTheDocument();
   });
 
