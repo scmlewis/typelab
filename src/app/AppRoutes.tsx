@@ -1,11 +1,19 @@
+import { lazy } from 'react';
 import { Route, Routes } from 'react-router';
 
 import { AppLayout } from '@/app/AppLayout';
-import { HistoryPage } from '@/app/pages/HistoryPage';
 import { HomePage } from '@/app/pages/HomePage';
 import { NotFoundPage } from '@/app/pages/NotFoundPage';
-import { ResultDetailPage } from '@/app/pages/ResultDetailPage';
-import { SettingsPage } from '@/app/pages/SettingsPage';
+
+const HistoryPage = lazy(() =>
+  import('@/app/pages/HistoryPage').then((module) => ({ default: module.HistoryPage })),
+);
+const ResultDetailPage = lazy(() =>
+  import('@/app/pages/ResultDetailPage').then((module) => ({ default: module.ResultDetailPage })),
+);
+const SettingsPage = lazy(() =>
+  import('@/app/pages/SettingsPage').then((module) => ({ default: module.SettingsPage })),
+);
 
 export function AppRoutes() {
   return (

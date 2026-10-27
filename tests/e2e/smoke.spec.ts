@@ -133,7 +133,9 @@ test('a history row opens the run detail with metrics and a personal best', asyn
   await expect(page).toHaveURL(/\/results\/[^/]+$/);
   await expect(page.getByRole('heading', { name: /run detail/i })).toBeVisible();
   await expect(page.getByText('Net WPM')).toBeVisible();
-  await expect(page.getByText('Raw WPM')).toBeVisible();
+  await expect(page.getByText('Raw WPM', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /speed over time/i })).toBeVisible();
+  await expect(page.getByText(/averaged .* peak second/i)).toBeVisible();
   await expect(page.getByText('Personal best for this category.')).toBeVisible();
 });
 

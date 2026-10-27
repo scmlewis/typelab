@@ -5,6 +5,7 @@ import { getCategoryKey, getComparableCategoryKey } from '@/engine/config';
 import { isDegenerateResult } from '@/engine/scoring';
 import type { TestResult } from '@/engine/types';
 import { getResultRepository } from '@/features/history/resultRepository';
+import { SpeedChart } from '@/features/history/SpeedChart';
 import {
   describeResultMode,
   describeTestConfig,
@@ -182,6 +183,8 @@ export function ResultDetailPage({ repository }: ResultDetailPageProps) {
         <Metric label="Consistency" value={formatPercent(result.consistency, 1)} />
         <Metric label="Time" value={formatDuration(result.durationMs)} />
       </dl>
+
+      <SpeedChart samples={result.samples} />
 
       <div className="mt-8 grid gap-8 border-t border-line pt-6 sm:grid-cols-2">
         <div>

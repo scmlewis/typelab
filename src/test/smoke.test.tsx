@@ -17,14 +17,14 @@ describe('app shell', () => {
     expect(screen.getByText(/local-only by design/i)).toBeInTheDocument();
   });
 
-  it('renders the settings route', () => {
+  it('renders the settings route', async () => {
     render(
       <MemoryRouter initialEntries={['/settings']}>
         <AppRoutes />
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('heading', { name: /make the lab yours/i })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /make the lab yours/i })).toBeInTheDocument();
   });
 
   it('renders the not-found route', () => {

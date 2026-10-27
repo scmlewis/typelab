@@ -121,8 +121,8 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [ ] Live stats visibility, error highlighting, quick restart
 - [ ] Reduced-motion preference
 - [x] Settings import/export + reset
-- [ ] Speed and raw-speed charts
-- [ ] Detailed result analysis
+- [x] Speed chart from interval samples
+- [x] Detailed result analysis
 - [x] History page + filters
 - [ ] Trend charts
 - [ ] Personal bests per category

@@ -72,6 +72,22 @@ describe('result detail page', () => {
     expect(screen.getByText('84.6%')).toBeInTheDocument();
     expect(screen.getByText('180')).toBeInTheDocument();
     expect(screen.getByText('Personal best for this category.')).toBeInTheDocument();
+    expect(screen.getByText(/too short for a speed chart/i)).toBeInTheDocument();
+  });
+
+  it('draws the speed chart for a run with samples', async () => {
+    const result = makeResult({
+      samples: [
+        { startMs: 0, durationMs: 1_000, chars: 5, wpm: 40 },
+        { startMs: 1_000, durationMs: 1_000, chars: 7, wpm: 70 },
+      ],
+    });
+    const repository = createRepository(result, result);
+
+    renderPage(repository);
+
+    expect(await screen.findByRole('heading', { name: /speed over time/i })).toBeInTheDocument();
+    expect(screen.getByText(/averaged 55 wpm with a peak second of 70 wpm/i)).toBeInTheDocument();
   });
 
   it('compares a run against the category best', async () => {

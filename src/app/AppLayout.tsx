@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { NavLink, Outlet } from 'react-router';
 
 import type { SettingsNotice } from '@/features/settings/settingsRepository';
@@ -78,7 +79,9 @@ export function AppLayout() {
       ) : null}
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-5 pb-20 pt-6 sm:px-8 sm:pt-16" id="main">
-        <Outlet />
+        <Suspense fallback={<p className="py-12 text-sm text-ink-muted">Loading…</p>}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <footer className="border-t border-line/80">
