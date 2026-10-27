@@ -69,6 +69,8 @@ interface TestResult {
 
 - **`durationMs`:** for `timed`, the configured duration; for `words`, `quote`, and `custom`, the measured elapsed time.
 - **`flags`:** `no-input`, `under-one-second`, `failed`, and `low-confidence` are persisted. Results with `no-input`, `under-one-second`, or `failed` are stored for history but excluded from personal bests and trend charts by default. History offers a "show excluded tests" filter.
+- **Accuracy and rounding:** accuracy is attempt-based and includes separators (a correct separator is a correct attempt; an extra separator is an incorrect attempt). Net/raw WPM and consistency are stored to one decimal; accuracy to two decimals.
+- **Timed character statistics:** only words up to and including the active word are scored. Untouched trailing filler is not counted as `missed`.
 - **`samples`:** one sample per second, plus a final partial bucket when it is ≥500 ms. Cap at **600 samples** (10 minutes); longer custom tests store the first 600 seconds and set `low-confidence`. Charts are rendered from these samples, so no future migration is needed.
 - **Category rules:** `timed` and `words` use the standard category key, including the vocabulary pool because it changes difficulty. `quote` uses the quote ID (`quote:<quoteId>:<language>:<errorPolicy>`), so each quote has its own best. `custom` results are **not compared** for personal bests because the text is arbitrary; they still appear in history and trends with a "custom" label.
 - **Cancelled tests** are not persisted. `failed` and `no-input` results are persisted with flags; they are not scored for comparison.

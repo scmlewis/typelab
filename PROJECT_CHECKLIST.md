@@ -46,12 +46,12 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Backspace and correction policy
 - [x] Strict failure and no-backspace policies
 - [ ] Restart without stale timers/listeners
-- [ ] Versioned scoring (`1.0.0`): net/raw WPM, accuracy, char stats, consistency
-- [ ] Bounded interval samples persisted for charts
-- [ ] Result flags (`no-input`, `under-one-second`, `failed`, `low-confidence`)
+- [x] Versioned scoring (`1.0.0`): net/raw WPM, accuracy, char stats, consistency
+- [x] Bounded interval samples persisted for charts
+- [x] Result flags (`no-input`, `under-one-second`, `failed`, `low-confidence`)
 - [ ] Degenerate results excluded from PBs/trends by default
 - [ ] Quote/custom category rules
-- [ ] Edge-case tests (zero elapsed, no input, partial intervals, incomplete words)
+- [x] Edge-case tests (zero elapsed, no input, partial intervals, incomplete words)
 
 ### Input and UI
 

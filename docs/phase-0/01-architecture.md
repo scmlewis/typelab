@@ -377,17 +377,21 @@ accuracy = correctAttempts
 - If `elapsedMs < 1000`, WPM is computed with a 1-second floor and the result is flagged `under-one-second`. It is excluded from personal bests and trends.
 - Raw WPM uses the final text, not cumulative keystrokes, so backspace spam cannot inflate it.
 - Character statistics are final-state counts: `{ correct, incorrect, extra, missed, correctSeparators, extraSeparators, missedSeparators }`.
+- **Accuracy includes separators as attempts:** a correctly placed separator is a correct attempt and an extra separator is an incorrect attempt, so the denominator is every committed attempt.
+- **Timed prompts are filler:** a timed test only counts target words up to and including the active word. Untouched trailing words in the long timed prompt are not `missed`; a word-count, quote, or custom test counts every trailing word because the prompt itself is the finish line.
+- **Rounding:** net/raw WPM and consistency are stored to one decimal; accuracy is stored to two decimals.
 
 ### 7.3 Consistency
 
 Consistency measures pace variation across fixed intervals.
 
 1. Divide the test into 1-second buckets aligned to the start.
-2. Count committed characters in each bucket (correct, incorrect, and extra; backspaces excluded).
+2. Count every committed character in each bucket (correct, incorrect, extra, and separators; backspaces excluded). A commit at the exact completion instant belongs to the last bucket.
 3. Convert each bucket to WPM: `chars / 5 / (bucketMs / 60000)`.
 4. Include the final partial bucket only when it is at least 500 ms long; normalise it by its actual duration.
 5. Compute the sample standard deviation of bucket WPMs and divide by the mean (coefficient of variation).
-6. `consistency = clamp(0, 100, 100 * (1 - cv))`.
+6. `consistency = clamp(0, 100, 100 * (1 - cv))`, stored to one decimal.
+7. Cap the stored series at 600 buckets (10 minutes); a longer test keeps the first 600 seconds and is flagged `low-confidence`.
 
 Edge cases:
 
