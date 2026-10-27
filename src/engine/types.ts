@@ -81,6 +81,20 @@ export interface CharacterStatistics {
 
 export type ResultFlag = 'no-input' | 'under-one-second' | 'failed' | 'low-confidence';
 
+export type EngineStatus = 'idle' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+export interface EngineSnapshot {
+  status: EngineStatus;
+  config: TestConfig;
+  prompt: Prompt;
+  typedInputs: readonly string[];
+  activeWordIndex: number;
+  elapsedMs: number;
+  attempts: readonly Attempt[];
+  commitTimestampsMs: readonly number[];
+  failureReason: string | null;
+}
+
 export interface TestResult {
   id: string;
   clientTestId: string;

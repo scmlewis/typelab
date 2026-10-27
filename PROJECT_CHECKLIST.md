@@ -39,12 +39,12 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] English 200 and English 1k word lists with provenance
 - [x] Seeded PRNG + prompt generator
 - [x] Punctuation and numbers transforms
-- [ ] `Clock` interface + fake clock
-- [ ] Engine state machine (`idle/running/completed/failed/cancelled`)
-- [ ] Timed completion at the boundary
-- [ ] Word-count completion on the final character
-- [ ] Backspace and correction policy
-- [ ] Strict failure and no-backspace policies
+- [x] `Clock` interface + fake clock
+- [x] Engine state machine (`idle/running/completed/failed/cancelled`)
+- [x] Timed completion at the boundary
+- [x] Word-count completion on the final character
+- [x] Backspace and correction policy
+- [x] Strict failure and no-backspace policies
 - [ ] Restart without stale timers/listeners
 - [ ] Versioned scoring (`1.0.0`): net/raw WPM, accuracy, char stats, consistency
 - [ ] Bounded interval samples persisted for charts
