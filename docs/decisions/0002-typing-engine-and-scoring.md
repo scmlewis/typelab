@@ -1,6 +1,6 @@
 # ADR 0002 — Typing Engine, Input Handling, and Scoring
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-27
 - **Deciders:** Product owner, implementation agent
 - **Related:** [Architecture](../phase-0/01-architecture.md#5-typing-engine), [Data model](../phase-0/03-data-model.md)

@@ -4,8 +4,8 @@ A polished, local-first typing test platform: timed and word-count tests, live W
 
 ## Status
 
-**Phase 1 — foundation in progress.**
-The local-only plan is approved. Hosting: Cloudflare Pages. Visual direction: “lab notebook”. No product features are implemented yet.
+**Phase 1 — foundation complete; engine next.**
+The local-only plan is approved. Hosting: Cloudflare Pages. Visual direction: “lab notebook”. The app shell, tooling, design tokens, and browser test harness are in place. Typing features are not implemented yet.
 
 ## Product scope
 
@@ -42,4 +42,41 @@ Architecture decision records live in [`docs/decisions/`](docs/decisions/).
 
 ## Local development
 
-Not yet available. Setup instructions will be added with the Phase 1 scaffold.
+Requirements: Node 22.12 or newer (`.node-version` pins 24) and npm 10 or newer. No environment variables or backend are required.
+
+```bash
+npm install
+npm run dev
+```
+
+Quality gates:
+
+```bash
+npm run typecheck
+npm run lint
+npm run format:check
+npm run test
+npm run build
+npm run test:e2e
+```
+
+End-to-end tests need the Playwright browsers once:
+
+```bash
+npx playwright install chromium firefox webkit
+```
+
+## Hosting
+
+The app is a static SPA intended for Cloudflare Pages:
+
+- Build command: `npm run build`
+- Output directory: `dist`
+- SPA fallback: `public/_redirects` rewrites all routes to `index.html`
+- Preview deployments: one per pull request/branch
+
+The deploy workflow expects a Cloudflare Pages project named `typelab` and these GitHub Actions secrets: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Until both are configured, the workflow builds successfully and skips deployment with a notice.
+
+## Data
+
+There is no server. Settings will live in `localStorage`, history in IndexedDB (Dexie), and export/import will be the backup path. Clearing browser storage deletes local data.

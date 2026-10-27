@@ -1,6 +1,6 @@
 # ADR 0003 — Local-First Persistence, Backup, and Future Sync
 
-- **Status:** Local storage accepted; cloud sync deferred
+- **Status:** Accepted (local storage and backup); cloud sync deferred
 - **Date:** 2026-10-27
 - **Deciders:** Product owner, implementation agent
 - **Related:** [Data model](../phase-0/03-data-model.md), [Architecture](../phase-0/01-architecture.md#9-persistence-and-data-access), [ADR 0005](0005-local-only-v1.md)

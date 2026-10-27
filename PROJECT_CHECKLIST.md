@@ -21,17 +21,17 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 
 ### Foundation
 
-- [ ] `git init` and initial commit
-- [ ] Vite + React + TypeScript scaffold
-- [ ] Strict TypeScript settings
-- [ ] Tailwind 4 + design tokens
-- [ ] ESLint + Prettier
-- [ ] Vitest + React Testing Library
-- [ ] Playwright
-- [ ] GitHub Actions CI (typecheck, lint, unit, build)
-- [ ] `.gitignore`, `.env.example` (no env required)
-- [ ] README local setup
-- [ ] ADRs moved to Accepted
+- [x] `git init` and initial commit
+- [x] Vite + React + TypeScript scaffold
+- [x] Strict TypeScript settings
+- [x] Tailwind 4 + design tokens
+- [x] ESLint + Prettier
+- [x] Vitest + React Testing Library
+- [x] Playwright
+- [x] GitHub Actions CI (typecheck, lint, unit, build)
+- [x] `.gitignore`, `.env.example` (no env required)
+- [x] README local setup
+- [x] ADRs moved to Accepted
 
 ### Engine
 
