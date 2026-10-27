@@ -109,6 +109,25 @@ export function SettingsProvider({ children, repository }: SettingsProviderProps
     [activeRepository, enqueue],
   );
 
+  const replaceSettings = useCallback(
+    async (settings: AppSettings) => {
+      settingsRef.current = settings;
+      setState((previous) => ({ ...previous, settings, error: null }));
+
+      try {
+        await enqueue(() => activeRepository.save(settings));
+      } catch {
+        if (mounted.current) {
+          setState((previous) => ({
+            ...previous,
+            error: 'Could not save imported settings. They apply for the current session.',
+          }));
+        }
+      }
+    },
+    [activeRepository, enqueue],
+  );
+
   const resetSettings = useCallback(async () => {
     settingsRef.current = DEFAULT_SETTINGS;
     setState((previous) => ({ ...previous, settings: DEFAULT_SETTINGS, error: null }));
@@ -136,10 +155,11 @@ export function SettingsProvider({ children, repository }: SettingsProviderProps
       notice: state.notice,
       error: state.error,
       updateTestDefaults,
+      replaceSettings,
       resetSettings,
       dismissNotice,
     }),
-    [state, updateTestDefaults, resetSettings, dismissNotice],
+    [state, updateTestDefaults, replaceSettings, resetSettings, dismissNotice],
   );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

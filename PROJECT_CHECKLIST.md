@@ -87,7 +87,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Result repository + Dexie
 - [x] History query for personal bests
 - [x] History page with mode filter and excluded-run toggle
-- [ ] `navigator.storage.persist()` request
+- [x] `navigator.storage.persist()` request
 - [ ] Quota/write-error handling with export action
 - [ ] Last-export date + backup reminder
 - [ ] No silent history deletion
@@ -119,16 +119,16 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [ ] Full settings (themes, palette, fonts, width, caret, sounds)
 - [ ] Live stats visibility, error highlighting, quick restart
 - [ ] Reduced-motion preference
-- [ ] Settings import/export + reset
+- [x] Settings import/export + reset
 - [ ] Speed and raw-speed charts
 - [ ] Detailed result analysis
 - [x] History page + filters
 - [ ] Trend charts
 - [ ] Personal bests per category
 - [ ] Pagination/incremental loading
-- [ ] JSON backup export/import with preview and duplicate merge
-- [ ] Invalid/oversized import handling
-- [ ] CSV export
+- [x] JSON backup export/import with preview and duplicate merge
+- [x] Invalid/oversized import handling
+- [x] CSV export
 - [ ] Storage usage display and retention controls
 - [ ] Share text summary + image card
 - [ ] Optional encoded URL share with size cap

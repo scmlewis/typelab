@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 
 import { DURATION_OPTIONS, WORD_COUNT_OPTIONS } from '@/engine/config';
 import type { ErrorPolicy } from '@/engine/types';
+import { BackupPanel } from '@/features/history/BackupPanel';
 import { DEFAULT_SETTINGS } from '@/features/settings/settings';
 import type { TestDefaults } from '@/features/settings/settings';
 import { useSettings } from '@/features/settings/settingsContext';
@@ -235,6 +236,8 @@ export function SettingsPage() {
           )}
         </div>
       </fieldset>
+
+      <BackupPanel />
 
       <div className="mt-8 rounded-card border border-line bg-surface p-6">
         <h2 className="font-display text-2xl tracking-tight">Local-only by design</h2>

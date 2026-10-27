@@ -119,3 +119,38 @@ test('history rows fit a phone viewport', async ({ page }) => {
   expect(box!.x).toBeGreaterThanOrEqual(0);
   expect(box!.x + box!.width).toBeLessThanOrEqual(390);
 });
+
+test('an exported backup imports into a fresh browser', async ({ page, browser }) => {
+  await runTenWords(page);
+
+  const origin = new URL(page.url()).origin;
+
+  await page.goto(`${origin}/settings`);
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: /export backup/i }).click();
+
+  const download = await downloadPromise;
+  const path = await download.path();
+
+  expect(path).toBeTruthy();
+
+  const freshContext = await browser.newContext();
+  const freshPage = await freshContext.newPage();
+
+  await freshPage.goto(`${origin}/settings`);
+  await freshPage.setInputFiles('#import-backup', path);
+
+  await expect(freshPage.getByText(/1 new run, 0 duplicates/i)).toBeVisible();
+
+  await freshPage.getByRole('button', { name: 'Import 1 run' }).click();
+  await expect(freshPage.getByText(/imported 1 new run/i)).toBeVisible();
+
+  await freshPage.goto(`${origin}/history`);
+  await freshPage.getByLabel('Show excluded runs').check();
+
+  await expect(freshPage.getByText('10 words')).toBeVisible();
+  await expect(freshPage.getByText('1 run')).toBeVisible();
+
+  await freshContext.close();
+});

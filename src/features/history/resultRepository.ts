@@ -1,6 +1,7 @@
 import { getCategoryKey, getComparableCategoryKey } from '@/engine/config';
 import { isDegenerateResult } from '@/engine/scoring';
 import type { Language, TestMode, TestResult } from '@/engine/types';
+import type { ImportSummary } from '@/features/history/backup';
 import { getTypelabDatabase } from '@/features/history/typelabDatabase';
 import type { TypelabDatabase } from '@/features/history/typelabDatabase';
 
@@ -57,6 +58,11 @@ export class LocalResultRepository {
     const result = await this.db.results.get(id);
 
     return result ?? null;
+  }
+
+  /** Every result, newest first. Used by backup export, not the paged UI. */
+  getAll(): Promise<TestResult[]> {
+    return this.db.results.orderBy('completedAt').reverse().toArray();
   }
 
   async list(query: HistoryQuery = {}): Promise<HistoryPage> {
@@ -132,6 +138,48 @@ export class LocalResultRepository {
 
   async delete(id: string): Promise<void> {
     await this.db.results.delete(id);
+  }
+
+  /**
+   * Merge imported history by `clientTestId`. Existing records win; the
+   * result is a count so the UI can report exactly what happened.
+   */
+  importResults(results: readonly TestResult[]): Promise<ImportSummary> {
+    return this.db.transaction('rw', this.db.results, async () => {
+      const existing = new Set(
+        (await this.db.results.orderBy('clientTestId').keys()).filter(
+          (key): key is string => typeof key === 'string',
+        ),
+      );
+      const fresh: TestResult[] = [];
+      let duplicates = 0;
+
+      for (const result of results) {
+        if (existing.has(result.clientTestId)) {
+          duplicates += 1;
+          continue;
+        }
+
+        existing.add(result.clientTestId);
+        fresh.push(result);
+      }
+
+      if (fresh.length > 0) {
+        await this.db.results.bulkAdd(fresh);
+      }
+
+      return { imported: fresh.length, duplicates, rejected: 0 };
+    });
+  }
+
+  async getMeta(key: string): Promise<string | null> {
+    const record = await this.db.meta.get(key);
+
+    return record?.value ?? null;
+  }
+
+  async setMeta(key: string, value: string): Promise<void> {
+    await this.db.meta.put({ key, value });
   }
 }
 

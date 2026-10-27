@@ -36,8 +36,16 @@ function createRepository(
 }
 
 function Harness() {
-  const { status, settings, notice, error, updateTestDefaults, resetSettings, dismissNotice } =
-    useSettings();
+  const {
+    status,
+    settings,
+    notice,
+    error,
+    updateTestDefaults,
+    replaceSettings,
+    resetSettings,
+    dismissNotice,
+  } = useSettings();
 
   return (
     <div>
@@ -61,6 +69,17 @@ function Harness() {
         type="button"
       >
         Reset
+      </button>
+      <button
+        onClick={() => {
+          void replaceSettings({
+            ...DEFAULT_SETTINGS,
+            testDefaults: { ...DEFAULT_SETTINGS.testDefaults, mode: 'words', wordCount: 50 },
+          });
+        }}
+        type="button"
+      >
+        Replace
       </button>
       <button onClick={dismissNotice} type="button">
         Dismiss
@@ -175,5 +194,24 @@ describe('settings provider', () => {
     await user.click(screen.getByRole('button', { name: 'Dismiss' }));
 
     expect(screen.getByTestId('notice')).toHaveTextContent('none');
+  });
+
+  it('replaces the full settings document', async () => {
+    const user = userEvent.setup();
+    const { repository, save } = createRepository();
+
+    renderProvider(repository);
+    await waitFor(() => {
+      expect(screen.getByText('ready')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Replace' }));
+
+    expect(screen.getByTestId('mode')).toHaveTextContent('words');
+    expect(screen.getByTestId('count')).toHaveTextContent('50');
+    expect(save).toHaveBeenCalledWith({
+      ...DEFAULT_SETTINGS,
+      testDefaults: { ...DEFAULT_SETTINGS.testDefaults, mode: 'words', wordCount: 50 },
+    });
   });
 });

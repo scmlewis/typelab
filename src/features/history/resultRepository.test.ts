@@ -205,4 +205,42 @@ describe('local result repository', () => {
 
     await expect(repository.getPersonalBest('custom')).resolves.toBeNull();
   });
+
+  it('imports new rows and skips records that already exist', async () => {
+    const { repository } = createRepository();
+    const existing = makeResult({ id: 'existing', clientTestId: 'existing-client' });
+    const fresh = makeResult({ id: 'fresh', clientTestId: 'fresh-client' });
+    const repeated = makeResult({ id: 'repeated', clientTestId: 'fresh-client' });
+
+    await repository.save(existing);
+
+    await expect(repository.importResults([existing, fresh, repeated])).resolves.toEqual({
+      imported: 1,
+      duplicates: 2,
+      rejected: 0,
+    });
+    await expect(repository.get('fresh')).resolves.toMatchObject({ id: 'fresh' });
+    await expect(repository.get('repeated')).resolves.toBeNull();
+  });
+
+  it('stores and reads metadata values', async () => {
+    const { repository } = createRepository();
+
+    await expect(repository.getMeta('lastExportAt')).resolves.toBeNull();
+
+    await repository.setMeta('lastExportAt', '2026-10-27T12:00:00.000Z');
+
+    await expect(repository.getMeta('lastExportAt')).resolves.toBe('2026-10-27T12:00:00.000Z');
+  });
+
+  it('returns every result newest first for export', async () => {
+    const { repository } = createRepository();
+    const first = makeResult();
+    const second = makeResult();
+
+    await repository.save(first);
+    await repository.save(second);
+
+    await expect(repository.getAll()).resolves.toEqual([second, first]);
+  });
 });

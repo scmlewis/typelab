@@ -88,6 +88,12 @@ export function TypingTest() {
     let cancelled = false;
     setSaveState('saving');
 
+    if (typeof navigator.storage?.persist === 'function') {
+      void navigator.storage.persist().catch(() => {
+        // Persistence is best-effort; the run is still saved normally.
+      });
+    }
+
     repository
       .save(result)
       .then(() => {

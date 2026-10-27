@@ -10,6 +10,7 @@ export interface SettingsContextValue {
   notice: SettingsNotice | null;
   error: string | null;
   updateTestDefaults: (defaults: TestDefaults) => Promise<void>;
+  replaceSettings: (settings: AppSettings) => Promise<void>;
   resetSettings: () => Promise<void>;
   dismissNotice: () => void;
 }
@@ -20,6 +21,7 @@ export const SettingsContext = createContext<SettingsContextValue>({
   notice: null,
   error: null,
   updateTestDefaults: async () => {},
+  replaceSettings: async () => {},
   resetSettings: async () => {},
   dismissNotice: () => {},
 });
