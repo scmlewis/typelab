@@ -417,12 +417,12 @@ Edge cases:
 A personal best is only comparable within the same **category key**:
 
 ```text
-timed:<durationMs>:<language>:<punctuation>:<numbers>:<errorPolicy>
-words:<wordCount>:<language>:<punctuation>:<numbers>:<errorPolicy>
+timed:<durationMs>:<language>:<vocabulary>:<punctuation>:<numbers>:<errorPolicy>
+words:<wordCount>:<language>:<vocabulary>:<punctuation>:<numbers>:<errorPolicy>
 quote:<quoteId>:<language>:<errorPolicy>
 ```
 
-Examples: `timed:60000:english:false:false:free`, `words:50:english:false:false:free`.
+Examples: `timed:60000:english:english-200:false:false:free`, `words:50:english:english-1k:false:false:free`.
 
 Ranking within a category: `netWpm` desc, then `accuracy` desc, then `consistency` desc, then earlier `completedAt`, then result ID.
 `custom` results are not compared for personal bests. Results with a different `scoringVersion` are never compared directly; the UI labels historical versions.
