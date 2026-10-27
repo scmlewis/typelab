@@ -82,6 +82,25 @@ describe('backup file', () => {
 });
 
 describe('backup validation', () => {
+  it('imports a backup made before appearance settings', () => {
+    const parsed = parseBackup(
+      JSON.stringify({
+        format: 'typelab-backup',
+        schemaVersion: 1,
+        exportedAt: '2026-10-27T12:00:00.000Z',
+        appVersion: '0.1.0',
+        settings: { testDefaults: DEFAULT_SETTINGS.testDefaults },
+        results: [],
+      }),
+    );
+
+    expect(parsed.ok).toBe(true);
+
+    if (parsed.ok) {
+      expect(parsed.settings).toEqual(DEFAULT_SETTINGS);
+    }
+  });
+
   it('rejects non-JSON input', () => {
     const parsed = parseBackup('{not json');
 

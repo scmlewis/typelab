@@ -249,8 +249,8 @@ function characterClassName(state: CharacterState): string {
     case 'extra':
       return 'rounded-[2px] bg-danger/10 text-danger/80';
     case 'missed':
-      return 'text-ink-muted/30 underline decoration-dotted';
+      return 'text-ink-muted/50 underline decoration-dotted';
     case 'pending':
-      return 'text-ink-muted/45';
+      return 'text-ink-muted';
   }
 }

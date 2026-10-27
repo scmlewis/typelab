@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 
 import { DEFAULT_SETTINGS } from '@/features/settings/settings';
-import type { AppSettings, TestDefaults } from '@/features/settings/settings';
+import type { Appearance, AppSettings, TestDefaults } from '@/features/settings/settings';
 import type { SettingsNotice } from '@/features/settings/settingsRepository';
 
 export interface SettingsContextValue {
@@ -10,6 +10,7 @@ export interface SettingsContextValue {
   notice: SettingsNotice | null;
   error: string | null;
   updateTestDefaults: (defaults: TestDefaults) => Promise<void>;
+  updateAppearance: (appearance: Appearance) => Promise<void>;
   replaceSettings: (settings: AppSettings) => Promise<void>;
   resetSettings: () => Promise<void>;
   dismissNotice: () => void;
@@ -21,6 +22,7 @@ export const SettingsContext = createContext<SettingsContextValue>({
   notice: null,
   error: null,
   updateTestDefaults: async () => {},
+  updateAppearance: async () => {},
   replaceSettings: async () => {},
   resetSettings: async () => {},
   dismissNotice: () => {},

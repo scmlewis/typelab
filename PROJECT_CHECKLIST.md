@@ -72,7 +72,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Config bar (mode, duration/words, language, punctuation, numbers)
 - [x] Restart
 - [x] Focus overlay
-- [ ] Light/dark basic themes
+- [x] Light/dark basic themes (light, dark, or follow the system)
 - [x] Responsive layout
 
 ### Results and persistence
@@ -83,7 +83,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Missing-result state
 - [x] Refresh recovery
 - [x] Settings repository + localStorage
-- [ ] Settings schema versioning/migration
+- [x] Settings schema versioning/migration (v1 → v2 adds appearance)
 - [x] Result repository + Dexie
 - [x] History query for personal bests
 - [x] History page with mode filter and excluded-run toggle
@@ -101,6 +101,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [ ] E2E: timer boundary
 - [x] E2E: refresh recovery
 - [x] E2E: result detail + personal best
+- [x] E2E: theme choice persists across a reload
 - [ ] E2E: responsive layout + keyboard navigation
 - [ ] Accessibility smoke (axe)
 - [ ] Reduced-motion check
@@ -117,7 +118,8 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [ ] Custom text mode
 - [ ] Additional languages/language packs
 - [ ] Saved presets
-- [ ] Full settings (themes, palette, fonts, width, caret, sounds)
+- [x] Theme setting (light, dark, system) with pre-paint boot and migration
+- [ ] Full settings (palette, fonts, width, caret, sounds)
 - [ ] Live stats visibility, error highlighting, quick restart
 - [ ] Reduced-motion preference
 - [x] Settings import/export + reset

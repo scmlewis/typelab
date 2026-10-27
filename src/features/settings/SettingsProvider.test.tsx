@@ -42,6 +42,7 @@ function Harness() {
     notice,
     error,
     updateTestDefaults,
+    updateAppearance,
     replaceSettings,
     resetSettings,
     dismissNotice,
@@ -52,6 +53,7 @@ function Harness() {
       <p>{status}</p>
       <p data-testid="mode">{settings.testDefaults.mode}</p>
       <p data-testid="count">{settings.testDefaults.wordCount}</p>
+      <p data-testid="theme">{settings.appearance.theme}</p>
       <p data-testid="notice">{notice ?? 'none'}</p>
       <p data-testid="error">{error ?? 'none'}</p>
       <button
@@ -61,6 +63,14 @@ function Harness() {
         type="button"
       >
         Update
+      </button>
+      <button
+        onClick={() => {
+          void updateAppearance({ theme: 'dark' });
+        }}
+        type="button"
+      >
+        Dark theme
       </button>
       <button
         onClick={() => {
@@ -194,6 +204,22 @@ describe('settings provider', () => {
     await user.click(screen.getByRole('button', { name: 'Dismiss' }));
 
     expect(screen.getByTestId('notice')).toHaveTextContent('none');
+  });
+
+  it('updates and saves the appearance preference', async () => {
+    const user = userEvent.setup();
+    const { repository, save } = createRepository();
+
+    renderProvider(repository);
+    await waitFor(() => {
+      expect(screen.getByText('ready')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('theme')).toHaveTextContent('system');
+
+    await user.click(screen.getByRole('button', { name: 'Dark theme' }));
+
+    expect(screen.getByTestId('theme')).toHaveTextContent('dark');
+    expect(save).toHaveBeenCalledWith({ ...DEFAULT_SETTINGS, appearance: { theme: 'dark' } });
   });
 
   it('replaces the full settings document', async () => {

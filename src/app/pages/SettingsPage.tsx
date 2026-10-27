@@ -5,7 +5,7 @@ import { DURATION_OPTIONS, WORD_COUNT_OPTIONS } from '@/engine/config';
 import type { ErrorPolicy } from '@/engine/types';
 import { BackupPanel } from '@/features/history/BackupPanel';
 import { DEFAULT_SETTINGS } from '@/features/settings/settings';
-import type { TestDefaults } from '@/features/settings/settings';
+import type { TestDefaults, ThemePreference } from '@/features/settings/settings';
 import { useSettings } from '@/features/settings/settingsContext';
 
 const ERROR_POLICIES: readonly { value: ErrorPolicy; label: string; hint: string }[] = [
@@ -18,10 +18,17 @@ const ERROR_POLICIES: readonly { value: ErrorPolicy; label: string; hint: string
   },
 ];
 
+const THEMES: readonly { value: ThemePreference; label: string }[] = [
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: 'System' },
+];
+
 export function SettingsPage() {
-  const { settings, status, updateTestDefaults, resetSettings } = useSettings();
+  const { settings, status, updateTestDefaults, updateAppearance, resetSettings } = useSettings();
   const [confirmingReset, setConfirmingReset] = useState(false);
   const defaults = settings.testDefaults;
+  const appearance = settings.appearance;
 
   const save = (next: Partial<TestDefaults>) => {
     void updateTestDefaults({ ...defaults, ...next });
@@ -47,9 +54,48 @@ export function SettingsPage() {
         Make the lab yours.
       </h1>
       <p className="mt-4 text-sm leading-7 text-ink-muted">
-        These defaults load every time you open the bench. Changes are saved in this browser
-        immediately, and never touch a run that is already in progress.
+        Appearance and test defaults are saved in this browser immediately, and never touch a run
+        that is already in progress.
       </p>
+
+      <fieldset
+        className="mt-8 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
+        disabled={status === 'loading'}
+      >
+        <legend className="sr-only">Appearance</legend>
+        <p
+          aria-hidden="true"
+          className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-ink-muted"
+        >
+          Appearance
+        </p>
+        <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-4">
+          <div>
+            <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">
+              Theme
+            </p>
+            <div
+              aria-label="Theme"
+              className="mt-2 flex rounded-full border border-line bg-surface-strong/50 p-0.5"
+              role="group"
+            >
+              {THEMES.map((theme) => (
+                <Choice
+                  active={appearance.theme === theme.value}
+                  key={theme.value}
+                  label={theme.label}
+                  onClick={() => {
+                    void updateAppearance({ theme: theme.value });
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+          <p className="max-w-xs text-xs leading-5 text-ink-muted">
+            System follows your device&apos;s light or dark setting.
+          </p>
+        </div>
+      </fieldset>
 
       <fieldset
         className="mt-8 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"

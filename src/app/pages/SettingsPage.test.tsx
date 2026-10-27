@@ -58,6 +58,27 @@ describe('settings page', () => {
     expect(screen.getByRole('button', { name: '50' })).toHaveAttribute('aria-pressed', 'true');
   });
 
+  it('saves a theme choice immediately', async () => {
+    const user = userEvent.setup();
+    const { repository, save } = createRepository();
+
+    renderPage(repository);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'System' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Dark' }));
+
+    expect(save).toHaveBeenCalledWith({
+      ...DEFAULT_SETTINGS,
+      appearance: { theme: 'dark' },
+    });
+    expect(screen.getByRole('button', { name: 'Dark' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
   it('saves a change immediately', async () => {
     const user = userEvent.setup();
     const { repository, save } = createRepository();

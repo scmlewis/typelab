@@ -85,6 +85,23 @@ test('settings persist across a reload and reach the bench', async ({ page }) =>
   );
 });
 
+test('a dark theme persists and reaches the bench', async ({ page }) => {
+  await page.goto('/settings');
+
+  await page.getByRole('button', { name: 'Dark', exact: true }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.getByRole('button', { name: 'Dark', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+
+  await page.getByRole('link', { name: 'Test', exact: true }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+});
+
 test('a completed run survives a reload in local history', async ({ page }) => {
   await runTenWords(page);
 

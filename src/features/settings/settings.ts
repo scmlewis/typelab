@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { DEFAULT_TIMED_CONFIG, DEFAULT_WORDS_CONFIG } from '@/engine/config';
 import type { TestConfig } from '@/engine/types';
 
-export const SETTINGS_SCHEMA_VERSION = 1;
+export const SETTINGS_SCHEMA_VERSION = 2;
 export const SETTINGS_STORAGE_KEY = 'typelab.settings';
 export const SETTINGS_BACKUP_PREFIX = 'typelab.settings.corrupt.';
 
@@ -21,11 +21,21 @@ export const testDefaultsSchema = z.object({
   errorPolicy: z.enum(['free', 'strict', 'no-backspace']),
 });
 
+export const themePreferenceSchema = z.enum(['light', 'dark', 'system']);
+
+export const appearanceSchema = z.object({
+  /** `system` follows the operating-system colour scheme. */
+  theme: themePreferenceSchema.default('system'),
+});
+
 export const settingsSchema = z.object({
   testDefaults: testDefaultsSchema,
+  appearance: appearanceSchema.default({ theme: 'system' }),
 });
 
 export type TestDefaults = z.infer<typeof testDefaultsSchema>;
+export type ThemePreference = z.infer<typeof themePreferenceSchema>;
+export type Appearance = z.infer<typeof appearanceSchema>;
 export type AppSettings = z.infer<typeof settingsSchema>;
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -39,7 +49,36 @@ export const DEFAULT_SETTINGS: AppSettings = {
     numbers: false,
     errorPolicy: 'free',
   },
+  appearance: {
+    theme: 'system',
+  },
 };
+
+const settingsV1Schema = z.object({
+  testDefaults: testDefaultsSchema,
+});
+
+/**
+ * Settings are migrated one version at a time. Unknown versions and invalid
+ * payloads return null so the repository can back up and reset instead.
+ */
+export function migrateSettings(version: number, value: unknown): AppSettings | null {
+  if (version === SETTINGS_SCHEMA_VERSION) {
+    const current = settingsSchema.safeParse(value);
+
+    return current.success ? current.data : null;
+  }
+
+  if (version === 1) {
+    const legacy = settingsV1Schema.safeParse(value);
+
+    return legacy.success
+      ? { testDefaults: legacy.data.testDefaults, appearance: { theme: 'system' } }
+      : null;
+  }
+
+  return null;
+}
 
 export function toTestConfig(settings: AppSettings, seed: number): TestConfig {
   const defaults = settings.testDefaults;

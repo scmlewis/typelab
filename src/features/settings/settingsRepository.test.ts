@@ -44,7 +44,21 @@ describe('local settings repository', () => {
 
     await repository.save(settings);
     await expect(repository.load()).resolves.toEqual({ settings, notice: null });
-    expect(localStorage.getItem(SETTINGS_STORAGE_KEY)).toContain(`"schemaVersion":1`);
+    expect(localStorage.getItem(SETTINGS_STORAGE_KEY)).toContain(
+      `"schemaVersion":${SETTINGS_SCHEMA_VERSION}`,
+    );
+  });
+
+  it('migrates a version 1 envelope instead of discarding it', async () => {
+    const repository = createRepository();
+    const legacy = { testDefaults: DEFAULT_SETTINGS.testDefaults };
+    localStorage.setItem(SETTINGS_STORAGE_KEY, storedEnvelope(legacy, 1));
+
+    await expect(repository.load()).resolves.toEqual({
+      settings: DEFAULT_SETTINGS,
+      notice: null,
+    });
+    expect(localStorage.getItem(`typelab.settings.corrupt.${NOW.getTime()}`)).toBeNull();
   });
 
   it('backs up invalid JSON, resets to defaults, and reports corruption', async () => {

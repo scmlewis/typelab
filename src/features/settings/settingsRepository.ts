@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import {
   DEFAULT_SETTINGS,
+  migrateSettings,
   SETTINGS_BACKUP_PREFIX,
   SETTINGS_SCHEMA_VERSION,
   SETTINGS_STORAGE_KEY,
@@ -94,17 +95,13 @@ export class LocalSettingsRepository {
       return { settings: cloneDefaults(), notice: 'newer' };
     }
 
-    if (envelope.data.schemaVersion < SETTINGS_SCHEMA_VERSION) {
+    const settings = migrateSettings(envelope.data.schemaVersion, envelope.data.settings);
+
+    if (settings === null) {
       return this.recover(raw);
     }
 
-    const settings = settingsSchema.safeParse(envelope.data.settings);
-
-    if (!settings.success) {
-      return this.recover(raw);
-    }
-
-    return { settings: settings.data, notice: null };
+    return { settings, notice: null };
   }
 
   private recover(raw: string): SettingsLoadResult {

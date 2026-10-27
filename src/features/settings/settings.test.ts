@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_TIMED_CONFIG, DEFAULT_WORDS_CONFIG } from '@/engine/config';
 import {
   DEFAULT_SETTINGS,
+  migrateSettings,
+  SETTINGS_SCHEMA_VERSION,
   settingsSchema,
   testDefaultsFromConfig,
   toTestConfig,
@@ -11,6 +13,12 @@ import {
 describe('settings schema', () => {
   it('defaults validate', () => {
     expect(settingsSchema.parse(DEFAULT_SETTINGS)).toEqual(DEFAULT_SETTINGS);
+  });
+
+  it('adds appearance defaults to a payload written before appearance existed', () => {
+    expect(settingsSchema.parse({ testDefaults: DEFAULT_SETTINGS.testDefaults })).toEqual(
+      DEFAULT_SETTINGS,
+    );
   });
 
   it('rejects unsupported durations and word counts', () => {
@@ -37,6 +45,24 @@ describe('settings schema', () => {
     });
 
     expect(parsed).toEqual(DEFAULT_SETTINGS);
+  });
+});
+
+describe('settings migration', () => {
+  it('migrates version 1 by adding appearance defaults', () => {
+    const legacy = { testDefaults: DEFAULT_SETTINGS.testDefaults };
+
+    expect(migrateSettings(1, legacy)).toEqual(DEFAULT_SETTINGS);
+    expect(SETTINGS_SCHEMA_VERSION).toBe(2);
+  });
+
+  it('accepts current settings unchanged', () => {
+    expect(migrateSettings(SETTINGS_SCHEMA_VERSION, DEFAULT_SETTINGS)).toEqual(DEFAULT_SETTINGS);
+  });
+
+  it('rejects unknown versions and invalid legacy payloads', () => {
+    expect(migrateSettings(0, DEFAULT_SETTINGS)).toBeNull();
+    expect(migrateSettings(1, { testDefaults: {} })).toBeNull();
   });
 });
 
