@@ -82,10 +82,11 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [ ] Personal-best comparison
 - [ ] Missing-result state
 - [ ] Refresh recovery
-- [ ] Settings repository + localStorage
+- [x] Settings repository + localStorage
 - [ ] Settings schema versioning/migration
-- [ ] Result repository + Dexie
-- [ ] History query for personal bests
+- [x] Result repository + Dexie
+- [x] History query for personal bests
+- [x] History page with mode filter and excluded-run toggle
 - [ ] `navigator.storage.persist()` request
 - [ ] Quota/write-error handling with export action
 - [ ] Last-export date + backup reminder
@@ -94,7 +95,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 ### Quality and exit
 
 - [ ] E2E: timed test
-- [ ] E2E: word-count test
+- [x] E2E: word-count test
 - [ ] E2E: backspace correction
 - [ ] E2E: restart before completion
 - [ ] E2E: timer boundary
@@ -121,7 +122,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [ ] Settings import/export + reset
 - [ ] Speed and raw-speed charts
 - [ ] Detailed result analysis
-- [ ] History page + filters
+- [x] History page + filters
 - [ ] Trend charts
 - [ ] Personal bests per category
 - [ ] Pagination/incremental loading

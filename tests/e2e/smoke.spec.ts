@@ -1,4 +1,21 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+
+async function runTenWords(page: Page) {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Words', exact: true }).click();
+  await page.getByRole('button', { name: '10', exact: true }).click();
+
+  const words = (await page.locator('[data-word-index]').allTextContents()).slice(0, 10);
+
+  expect(words).toHaveLength(10);
+
+  await page.getByLabel('Typing input').focus();
+  await page.keyboard.type(words.join(' '));
+
+  await expect(page.getByTestId('result-panel')).toBeVisible();
+  await expect(page.getByTestId('save-status')).toHaveAttribute('data-save-status', 'saved');
+}
 
 test('home page renders and primary navigation works', async ({ page }) => {
   await page.goto('/');
@@ -8,28 +25,17 @@ test('home page renders and primary navigation works', async ({ page }) => {
   await page.getByRole('link', { name: 'Settings', exact: true }).click();
   await expect(page.getByRole('heading', { name: /make the lab yours/i })).toBeVisible();
 
+  await page.getByRole('link', { name: 'History', exact: true }).click();
+  await expect(page.getByRole('heading', { name: /local history/i })).toBeVisible();
+
   await page.goto('/missing');
   await expect(page.getByRole('heading', { name: /not in the notebook/i })).toBeVisible();
 });
 
 test('a ten-word run completes and shows a result', async ({ page }) => {
-  await page.goto('/');
-
-  await page.getByRole('button', { name: 'Words', exact: true }).click();
-  await page.getByRole('button', { name: '10', exact: true }).click();
-
-  const surface = page.getByTestId('typing-surface');
-  await expect(surface).toHaveAttribute('data-status', 'idle');
-
-  const words = (await page.locator('[data-word-index]').allTextContents()).slice(0, 10);
-
-  expect(words).toHaveLength(10);
-
-  await page.getByLabel('Typing input').focus();
-  await page.keyboard.type(words.join(' '));
+  await runTenWords(page);
 
   const result = page.getByTestId('result-panel');
-  await expect(result).toBeVisible();
   await expect(result.getByRole('heading', { name: /run complete/i })).toBeVisible();
   await expect(page.getByTestId('result-net-wpm')).toHaveText(/\d+/);
 });
@@ -43,6 +49,73 @@ test('the typing surface stays above the fold on a phone viewport', async ({ pag
 
   expect(box).not.toBeNull();
   expect(box!.y + box!.height).toBeLessThanOrEqual(664);
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(390);
+});
+
+test('settings persist across a reload and reach the bench', async ({ page }) => {
+  await page.goto('/settings');
+
+  await page.getByRole('button', { name: 'Words', exact: true }).click();
+  await page.getByRole('button', { name: '10', exact: true }).click();
+
+  await page.reload();
+
+  await expect(page.getByRole('button', { name: 'Words', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(page.getByRole('button', { name: '10', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+
+  await page.getByRole('link', { name: 'Test', exact: true }).click();
+
+  await expect(page.getByRole('button', { name: 'Words', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(page.getByRole('button', { name: '10', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+});
+
+test('a completed run survives a reload in local history', async ({ page }) => {
+  await runTenWords(page);
+
+  await page.getByRole('link', { name: 'History', exact: true }).click();
+  await expect(page.getByRole('heading', { name: /local history/i })).toBeVisible();
+
+  // Playwright types faster than a human, so the run carries the
+  // under-one-second flag and is hidden unless excluded runs are shown.
+  await page.getByLabel('Show excluded runs').check();
+
+  await expect(page.getByText('10 words')).toBeVisible();
+  await expect(page.getByText('1 run')).toBeVisible();
+
+  await page.reload();
+
+  await page.getByLabel('Show excluded runs').check();
+
+  await expect(page.getByText('10 words')).toBeVisible();
+  await expect(page.getByText('1 run')).toBeVisible();
+});
+
+test('history rows fit a phone viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 664 });
+  await runTenWords(page);
+
+  await page.goto('/history');
+  await page.getByLabel('Show excluded runs').check();
+
+  const row = page.locator('ul > li').first();
+  await expect(row).toBeVisible();
+
+  const box = await row.boundingBox();
+
+  expect(box).not.toBeNull();
   expect(box!.x).toBeGreaterThanOrEqual(0);
   expect(box!.x + box!.width).toBeLessThanOrEqual(390);
 });

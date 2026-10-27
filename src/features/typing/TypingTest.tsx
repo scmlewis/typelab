@@ -1,14 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router';
 
-import { DEFAULT_TIMED_CONFIG } from '@/engine/config';
 import { generatePrompt } from '@/engine/prompt';
 import type { Prompt, TestConfig } from '@/engine/types';
+import { getTypelabDatabase } from '@/features/history/typelabDatabase';
+import { LocalResultRepository } from '@/features/history/resultRepository';
 import { LiveStats } from '@/features/typing/LiveStats';
 import { ResultPanel } from '@/features/typing/ResultPanel';
 import { TestToolbar } from '@/features/typing/TestToolbar';
 import { TypingSurface } from '@/features/typing/TypingSurface';
 import { TypingStore } from '@/features/typing/typingStore';
 import { useTypingSelector } from '@/features/typing/useTypingSelector';
+import { toTestConfig, testDefaultsFromConfig } from '@/features/settings/settings';
+import { useSettings } from '@/features/settings/settingsContext';
 
 interface TestSession {
   config: TestConfig;
@@ -31,7 +35,13 @@ function randomSeed(): number {
 }
 
 export function TypingTest() {
-  const [session, setSession] = useState<TestSession>(() => createSession(DEFAULT_TIMED_CONFIG));
+  const { settings, updateTestDefaults } = useSettings();
+  const repository = useMemo(() => new LocalResultRepository(getTypelabDatabase()), []);
+  const [session, setSession] = useState<TestSession>(() =>
+    createSession(toTestConfig(settings, randomSeed())),
+  );
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const status = useTypingSelector(session.store, (state) => state.snapshot.status);
   const result = useTypingSelector(session.store, (state) => state.result);
 
@@ -54,6 +64,50 @@ export function TypingTest() {
   const repeatTest = useCallback(() => {
     launch(session.config, session.prompt);
   }, [launch, session.config, session.prompt]);
+
+  const changeConfig = useCallback(
+    (nextConfig: TestConfig) => {
+      launch(nextConfig);
+
+      const defaults = testDefaultsFromConfig(nextConfig);
+
+      if (defaults) {
+        void updateTestDefaults(defaults);
+      }
+    },
+    [launch, updateTestDefaults],
+  );
+
+  useEffect(() => {
+    if (result === null) {
+      setSaveError(null);
+      setSaveState('idle');
+      return;
+    }
+
+    let cancelled = false;
+    setSaveState('saving');
+
+    repository
+      .save(result)
+      .then(() => {
+        if (!cancelled) {
+          setSaveState('saved');
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSaveState('error');
+          setSaveError(
+            'This run could not be saved to local history. Browser storage may be full or blocked.',
+          );
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [repository, result]);
 
   useEffect(() => {
     if (typeof requestAnimationFrame !== 'function') {
@@ -93,14 +147,40 @@ export function TypingTest() {
       <TestToolbar
         config={session.config}
         disabled={status === 'running'}
-        onChange={(next) => {
-          launch(next);
-        }}
+        onChange={changeConfig}
         onRestart={nextTest}
       />
 
       {terminal ? (
-        <ResultPanel onNext={nextTest} onRepeat={repeatTest} result={result} status={status} />
+        <>
+          <ResultPanel onNext={nextTest} onRepeat={repeatTest} result={result} status={status} />
+          {result ? (
+            <div
+              aria-live="polite"
+              className="mt-4 flex flex-wrap items-center gap-3 text-xs text-ink-muted"
+              data-save-status={saveState}
+              data-testid="save-status"
+            >
+              {saveState === 'saving' ? <span>Saving to local history…</span> : null}
+              {saveState === 'saved' ? (
+                <>
+                  <span>Saved to local history.</span>
+                  <Link className="font-medium underline underline-offset-4" to="/history">
+                    View history
+                  </Link>
+                </>
+              ) : null}
+            </div>
+          ) : null}
+          {saveError ? (
+            <p
+              className="mt-4 rounded-xl border border-danger/30 bg-danger/5 px-4 py-3 text-xs leading-5 text-danger"
+              role="alert"
+            >
+              {saveError}
+            </p>
+          ) : null}
+        </>
       ) : (
         <>
           <LiveStats config={session.config} store={session.store} />

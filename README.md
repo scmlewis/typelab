@@ -4,8 +4,8 @@ A polished, local-first typing test platform: timed and word-count tests, live W
 
 ## Status
 
-**Phase 1 — typing bench live; persistence next.**
-The local-only plan is approved. Hosting: Cloudflare Pages. Visual direction: “lab notebook”. The engine, scoring, input adapter, and responsive typing UI are implemented. Timed (15–120 s) and word-count (10–100) tests run end to end with live WPM, raw WPM, accuracy, character feedback, restart, and an in-memory results summary. Results are not persisted yet; settings, history, and analytics are next.
+**Phase 1 — typing bench and local persistence live.**
+The local-only plan is approved. Hosting: Cloudflare Pages. Visual direction: “lab notebook”. Timed (15–120 s) and word-count (10–100) tests run end to end with live WPM, raw WPM, accuracy, character feedback, restart, and a results summary. Settings persist in `localStorage`; completed runs persist in IndexedDB and appear at `/history` with a mode filter, an excluded-run toggle, and deletion. Export/import, result-detail routes, personal-best comparison, charts, themes, and sharing are next.
 
 ## Product scope
 
