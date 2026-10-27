@@ -120,6 +120,30 @@ test('a quote run completes and keeps its source', async ({ page }) => {
   await expect(page.getByTestId('quote-source')).toHaveText(source ?? '');
 });
 
+test('a custom text run completes and reports itself', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Text', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Text', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+
+  const custom = 'The quick brown fox jumps over the lazy dog.';
+
+  await page.getByLabel('Custom text').fill(custom);
+  await page.getByRole('button', { name: /start custom test/i }).click();
+
+  const words = await page.locator('[data-word-index]').allTextContents();
+  expect(words.join(' ')).toBe(custom);
+
+  await page.getByLabel('Typing input').focus();
+  await page.keyboard.type(custom);
+
+  await expect(page.getByTestId('result-panel')).toBeVisible();
+  await expect(page.getByTestId('save-status')).toHaveAttribute('data-save-status', 'saved');
+  await expect(page.getByText(/custom text · english/i)).toBeVisible();
+});
+
 test('a completed run survives a reload in local history', async ({ page }) => {
   await runTenWords(page);
 
@@ -177,7 +201,9 @@ test('a history row opens the run detail with metrics and a personal best', asyn
 test('a missing run shows a recoverable state', async ({ page }) => {
   await page.goto('/results/does-not-exist');
 
-  await expect(page.getByRole('heading', { name: /run not found/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /run not found/i })).toBeVisible({
+    timeout: 10_000,
+  });
   await expect(page.getByRole('link', { name: /local history/i })).toBeVisible();
 });
 

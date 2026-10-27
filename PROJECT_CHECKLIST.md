@@ -115,7 +115,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 ## Phase 2 — Advanced typing, analytics, and backup
 
 - [x] Quote mode
-- [ ] Custom text mode
+- [x] Custom text mode
 - [ ] Additional languages/language packs
 - [ ] Saved presets
 - [x] Theme setting (light, dark, system) with pre-paint boot and migration

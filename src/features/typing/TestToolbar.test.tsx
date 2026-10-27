@@ -28,6 +28,7 @@ describe('test toolbar quote mode', () => {
         config={DEFAULT_TIMED_CONFIG}
         disabled={false}
         onChange={onChange}
+        onCustomText={() => {}}
         onRestart={() => {}}
       />,
     );
@@ -42,12 +43,52 @@ describe('test toolbar quote mode', () => {
     expect(getQuoteById(next.quoteId)).not.toBeNull();
   });
 
+  it('asks for custom text instead of switching immediately', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const onCustomText = vi.fn();
+
+    render(
+      <TestToolbar
+        config={DEFAULT_TIMED_CONFIG}
+        disabled={false}
+        onChange={onChange}
+        onCustomText={onCustomText}
+        onRestart={() => {}}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Text' }));
+
+    expect(onCustomText).toHaveBeenCalledTimes(1);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('marks Text active and hides list controls while composing', () => {
+    render(
+      <TestToolbar
+        config={DEFAULT_TIMED_CONFIG}
+        displayMode="custom"
+        disabled={false}
+        onChange={() => {}}
+        onCustomText={() => {}}
+        onRestart={() => {}}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Text' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByLabelText('Vocabulary')).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Duration' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Modifiers' })).not.toBeInTheDocument();
+  });
+
   it('hides word-list and modifier controls that do not apply to quotes', () => {
     render(
       <TestToolbar
         config={quoteConfig()}
         disabled={false}
         onChange={() => {}}
+        onCustomText={() => {}}
         onRestart={() => {}}
       />,
     );

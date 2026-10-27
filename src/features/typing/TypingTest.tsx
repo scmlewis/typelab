@@ -3,9 +3,10 @@ import { Link } from 'react-router';
 
 import { getQuoteById, pickQuote } from '@/engine/content/quotes';
 import { generatePrompt } from '@/engine/prompt';
-import type { Prompt, TestConfig } from '@/engine/types';
+import type { CustomTestConfig, Prompt, TestConfig } from '@/engine/types';
 import { getTypelabDatabase } from '@/features/history/typelabDatabase';
 import { LocalResultRepository } from '@/features/history/resultRepository';
+import { CustomTextPanel } from '@/features/typing/CustomTextPanel';
 import { LiveStats } from '@/features/typing/LiveStats';
 import { ResultPanel } from '@/features/typing/ResultPanel';
 import { TestToolbar } from '@/features/typing/TestToolbar';
@@ -77,6 +78,7 @@ export function TypingTest() {
   );
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [customOpen, setCustomOpen] = useState(false);
   const status = useTypingSelector(session.store, (state) => state.snapshot.status);
   const result = useTypingSelector(session.store, (state) => state.result);
 
@@ -102,6 +104,7 @@ export function TypingTest() {
 
   const changeConfig = useCallback(
     (nextConfig: TestConfig) => {
+      setCustomOpen(false);
       launch(nextConfig);
 
       const defaults = testDefaultsFromConfig(nextConfig);
@@ -111,6 +114,28 @@ export function TypingTest() {
       }
     },
     [launch, updateTestDefaults],
+  );
+
+  const startCustomText = useCallback(
+    (customText: string) => {
+      const base = session.config;
+      const config: CustomTestConfig = {
+        language: base.language,
+        vocabulary: base.vocabulary,
+        punctuation: base.punctuation,
+        numbers: base.numbers,
+        errorPolicy: base.errorPolicy,
+        seed: base.seed,
+        mode: 'custom',
+        durationSeconds: null,
+        wordCount: null,
+        quoteId: null,
+        customText,
+      };
+
+      changeConfig(config);
+    },
+    [changeConfig, session.config],
   );
 
   useEffect(() => {
@@ -188,12 +213,24 @@ export function TypingTest() {
     <div className="mt-6 rounded-card border border-line bg-surface p-5 shadow-card sm:mt-8 sm:p-8">
       <TestToolbar
         config={session.config}
+        displayMode={customOpen ? 'custom' : session.config.mode}
         disabled={status === 'running'}
         onChange={changeConfig}
+        onCustomText={() => {
+          setCustomOpen(true);
+        }}
         onRestart={nextTest}
       />
 
-      {terminal ? (
+      {customOpen ? (
+        <CustomTextPanel
+          initialText={session.config.mode === 'custom' ? session.config.customText : ''}
+          onCancel={() => {
+            setCustomOpen(false);
+          }}
+          onStart={startCustomText}
+        />
+      ) : terminal ? (
         <>
           <ResultPanel onNext={nextTest} onRepeat={repeatTest} result={result} status={status} />
           {result ? (
@@ -239,7 +276,9 @@ export function TypingTest() {
       )}
 
       <p className="mt-6 border-t border-line/70 pt-4 text-xs leading-5 text-ink-muted">
-        Tab moves focus. Esc ends the run. Ctrl + Enter starts a new text with the same settings.
+        {customOpen
+          ? 'Esc closes this panel. Tab moves focus.'
+          : 'Tab moves focus. Esc ends the run. Ctrl + Enter starts a new text with the same settings.'}
       </p>
     </div>
   );

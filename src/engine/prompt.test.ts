@@ -4,7 +4,7 @@ import { getWordList } from '@/engine/content/word-lists';
 import { DEFAULT_TIMED_CONFIG, DEFAULT_WORDS_CONFIG } from '@/engine/config';
 import { GENERATOR_VERSION } from '@/engine/versions';
 import type { QuoteTestConfig, TestConfig } from '@/engine/types';
-import { generatePrompt, TIMED_PROMPT_WORD_COUNT } from '@/engine/prompt';
+import { generatePrompt, normalizeCustomText, TIMED_PROMPT_WORD_COUNT } from '@/engine/prompt';
 
 describe('word lists', () => {
   it('provides the promised word-list sizes', () => {
@@ -133,6 +133,12 @@ describe('prompt generation', () => {
 
     expect(prompt.words).toEqual(['Hello,', 'world!']);
     expect(prompt.text).toBe('Hello, world!');
+  });
+
+  it('collapses whitespace runs in custom text', () => {
+    expect(normalizeCustomText('  One,\n\n\ttwo  three.  ')).toBe('One, two three.');
+    expect(normalizeCustomText('   ')).toBe('');
+    expect(normalizeCustomText('Keep "quotes" and CAPS!')).toBe('Keep "quotes" and CAPS!');
   });
 
   it('creates a quote prompt from supplied text', () => {

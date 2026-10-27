@@ -12,6 +12,7 @@ export type { TestConfig } from '@/engine/types';
 
 export const DURATION_OPTIONS: readonly DurationSeconds[] = [15, 30, 60, 120];
 export const WORD_COUNT_OPTIONS: readonly WordCount[] = [10, 25, 50, 100];
+export const CUSTOM_TEXT_MAX_LENGTH = 10_000;
 
 const durationSchema = z.union([z.literal(15), z.literal(30), z.literal(60), z.literal(120)]);
 const wordCountSchema = z.union([z.literal(10), z.literal(25), z.literal(50), z.literal(100)]);
@@ -54,7 +55,7 @@ const customConfigSchema = baseConfigSchema.extend({
   durationSeconds: z.null(),
   wordCount: z.null(),
   quoteId: z.null(),
-  customText: z.string().trim().min(1).max(10_000),
+  customText: z.string().trim().min(1).max(CUSTOM_TEXT_MAX_LENGTH),
 });
 
 export const testConfigSchema = z.discriminatedUnion('mode', [

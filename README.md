@@ -5,7 +5,7 @@ A polished, local-first typing test platform: timed and word-count tests, live W
 ## Status
 
 **Phase 2 — advanced typing in progress.**
-The local-only plan is approved. Hosting: Cloudflare Pages. Visual direction: “lab notebook”. Timed (15–120 s), word-count (10–100), and classic-quote tests run end to end with live WPM, raw WPM, accuracy, character feedback, restart, and a results summary. Settings persist in `localStorage`; completed runs persist in IndexedDB and appear at `/history` with a mode filter, an excluded-run toggle, and deletion. Each run opens at `/results/:id` with full statistics, its configuration, a per-second speed chart, and a personal-best comparison for its category. Appearance supports light, dark, or system themes, applied before first paint and saved with a versioned settings migration. The settings page exports a versioned JSON backup (settings plus every run), a CSV history, and imports a validated backup with duplicate detection and an optional settings replace. Custom text, history trend charts, fonts/sounds, and sharing are next.
+The local-only plan is approved. Hosting: Cloudflare Pages. Visual direction: “lab notebook”. Timed (15–120 s), word-count (10–100), classic-quote, and pasted-custom-text tests run end to end with live WPM, raw WPM, accuracy, character feedback, restart, and a results summary. Settings persist in `localStorage`; completed runs persist in IndexedDB and appear at `/history` with a mode filter, an excluded-run toggle, and deletion. Each run opens at `/results/:id` with full statistics, its configuration, a per-second speed chart, and a personal-best comparison for its category. Appearance supports light, dark, or system themes, applied before first paint and saved with a versioned settings migration. The settings page exports a versioned JSON backup (settings plus every run), a CSV history, and imports a validated backup with duplicate detection and an optional settings replace. History trend charts, fonts/sounds, additional languages, and sharing are next.
 
 ## Product scope
 
@@ -81,3 +81,5 @@ The deploy workflow expects a Cloudflare Pages project named `typelab` and these
 ## Data
 
 There is no server. Settings live in `localStorage`, history in IndexedDB (Dexie), and a versioned backup file is the durability path. Clearing browser storage deletes local data, so the settings page exports settings and runs together.
+
+Custom text is stored as part of the run configuration. It stays in this browser until you delete the run, and it is included when you export a backup. Repeated whitespace and line breaks are reduced to single spaces before a custom run starts.

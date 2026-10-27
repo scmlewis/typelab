@@ -39,8 +39,17 @@ export function generatePrompt(config: TestConfig, options: PromptOptions = {}):
   }
 }
 
+/**
+ * Typing is word-based, so arbitrary whitespace is reduced to single spaces.
+ * Punctuation, casing, and word spelling are left untouched.
+ */
+export function normalizeCustomText(text: string): string {
+  return text.replace(/\s+/g, ' ').trim();
+}
+
 export function createPromptFromText(text: string): Prompt {
-  const words = text.trim().split(/\s+/).filter(Boolean);
+  const normalized = normalizeCustomText(text);
+  const words = normalized.length === 0 ? [] : normalized.split(' ');
 
   if (words.length === 0) {
     throw new Error('Prompt text cannot be empty.');

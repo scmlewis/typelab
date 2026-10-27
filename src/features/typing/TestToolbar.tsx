@@ -11,12 +11,22 @@ import type { DurationSeconds, QuoteTestConfig, TestConfig, WordCount } from '@/
 
 interface TestToolbarProps {
   config: TestConfig;
+  /** Overrides the active mode while the custom-text composer is open. */
+  displayMode?: TestConfig['mode'];
   disabled: boolean;
   onChange: (config: TestConfig) => void;
+  onCustomText: () => void;
   onRestart: () => void;
 }
 
-export function TestToolbar({ config, disabled, onChange, onRestart }: TestToolbarProps) {
+export function TestToolbar({
+  config,
+  displayMode,
+  disabled,
+  onChange,
+  onCustomText,
+  onRestart,
+}: TestToolbarProps) {
   const shared = {
     language: config.language,
     vocabulary: config.vocabulary,
@@ -48,7 +58,8 @@ export function TestToolbar({ config, disabled, onChange, onRestart }: TestToolb
     );
   };
 
-  const usesWordOptions = config.mode === 'timed' || config.mode === 'words';
+  const activeMode = displayMode ?? config.mode;
+  const usesWordOptions = activeMode === 'timed' || activeMode === 'words';
 
   const setDuration = (durationSeconds: DurationSeconds) => {
     if (config.mode === 'timed') {
@@ -64,14 +75,14 @@ export function TestToolbar({ config, disabled, onChange, onRestart }: TestToolb
 
   return (
     <div className="mt-6 border-b border-line/80 pb-3 sm:mt-8 sm:flex sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-3 sm:pb-4">
-      <div className="flex items-center gap-2 sm:contents">
+      <div className="flex flex-wrap items-center gap-2 sm:contents">
         <div
           aria-label="Test mode"
           className="flex shrink-0 rounded-full border border-line bg-surface/70 p-0.5 sm:order-1"
           role="group"
         >
           <ModeButton
-            active={config.mode === 'timed'}
+            active={activeMode === 'timed'}
             disabled={disabled}
             label="Time"
             onClick={() => {
@@ -79,7 +90,7 @@ export function TestToolbar({ config, disabled, onChange, onRestart }: TestToolb
             }}
           />
           <ModeButton
-            active={config.mode === 'words'}
+            active={activeMode === 'words'}
             disabled={disabled}
             label="Words"
             onClick={() => {
@@ -87,39 +98,24 @@ export function TestToolbar({ config, disabled, onChange, onRestart }: TestToolb
             }}
           />
           <ModeButton
-            active={config.mode === 'quote'}
+            active={activeMode === 'quote'}
             disabled={disabled}
             label="Quote"
             onClick={() => {
               switchMode('quote');
             }}
           />
+          <ModeButton
+            active={activeMode === 'custom'}
+            disabled={disabled}
+            label="Text"
+            onClick={onCustomText}
+          />
         </div>
-
-        {usesWordOptions ? (
-          <label className="flex min-w-0 flex-1 items-center gap-2 text-xs text-ink-muted sm:order-3 sm:flex-none">
-            <span className="hidden font-mono uppercase tracking-[0.14em] sm:inline">List</span>
-            <select
-              aria-label="Vocabulary"
-              className="min-w-0 flex-1 rounded-full border border-line bg-surface px-2.5 py-2 text-xs text-ink disabled:opacity-50 sm:flex-none sm:px-3 sm:py-1.5"
-              disabled={disabled}
-              onChange={(event) => {
-                onChange({
-                  ...config,
-                  vocabulary: event.target.value === 'english-1k' ? 'english-1k' : 'english-200',
-                });
-              }}
-              value={config.vocabulary}
-            >
-              <option value="english-200">Top 200</option>
-              <option value="english-1k">Top 1,000</option>
-            </select>
-          </label>
-        ) : null}
 
         <button
           aria-label="Restart test"
-          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-line p-2.5 text-xs font-medium transition-colors hover:bg-surface-strong sm:order-5 sm:ml-auto sm:px-3.5 sm:py-1.5"
+          className="order-1 inline-flex shrink-0 items-center gap-2 rounded-full border border-line p-2.5 text-xs font-medium transition-colors hover:bg-surface-strong sm:order-5 sm:ml-auto sm:px-3.5 sm:py-1.5"
           onClick={onRestart}
           type="button"
         >
@@ -130,7 +126,7 @@ export function TestToolbar({ config, disabled, onChange, onRestart }: TestToolb
 
       {usesWordOptions ? (
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mt-0 sm:contents">
-          {config.mode === 'timed' ? (
+          {activeMode === 'timed' ? (
             <div aria-label="Duration" className="flex items-center gap-1 sm:order-2" role="group">
               {DURATION_OPTIONS.map((duration) => (
                 <OptionButton
@@ -163,6 +159,25 @@ export function TestToolbar({ config, disabled, onChange, onRestart }: TestToolb
               ))}
             </div>
           )}
+
+          <label className="flex min-w-0 flex-1 items-center gap-2 text-xs text-ink-muted sm:order-3 sm:flex-none">
+            <span className="hidden font-mono uppercase tracking-[0.14em] sm:inline">List</span>
+            <select
+              aria-label="Vocabulary"
+              className="min-w-0 flex-1 rounded-full border border-line bg-surface px-2.5 py-2 text-xs text-ink disabled:opacity-50 sm:flex-none sm:px-3 sm:py-1.5"
+              disabled={disabled}
+              onChange={(event) => {
+                onChange({
+                  ...config,
+                  vocabulary: event.target.value === 'english-1k' ? 'english-1k' : 'english-200',
+                });
+              }}
+              value={config.vocabulary}
+            >
+              <option value="english-200">Top 200</option>
+              <option value="english-1k">Top 1,000</option>
+            </select>
+          </label>
 
           <div aria-label="Modifiers" className="flex items-center gap-1 sm:order-4" role="group">
             <OptionButton
