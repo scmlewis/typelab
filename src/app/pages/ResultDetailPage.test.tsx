@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_TIMED_CONFIG } from '@/engine/config';
+import { QUOTES } from '@/engine/content/quotes';
 import type { TestResult } from '@/engine/types';
 import { ResultDetailPage } from '@/app/pages/ResultDetailPage';
 
@@ -73,6 +74,28 @@ describe('result detail page', () => {
     expect(screen.getByText('180')).toBeInTheDocument();
     expect(screen.getByText('Personal best for this category.')).toBeInTheDocument();
     expect(screen.getByText(/too short for a speed chart/i)).toBeInTheDocument();
+  });
+
+  it('shows the source of a quote run', async () => {
+    const quote = QUOTES[0]!;
+    const result = makeResult({
+      testMode: 'quote',
+      wordCount: null,
+      configuration: {
+        ...DEFAULT_TIMED_CONFIG,
+        mode: 'quote',
+        durationSeconds: null,
+        wordCount: null,
+        quoteId: quote.id,
+        customText: null,
+      },
+    });
+    const repository = createRepository(result, result);
+
+    renderPage(repository);
+
+    expect(await screen.findByText(quote.source)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(quote.author))).toBeInTheDocument();
   });
 
   it('draws the speed chart for a run with samples', async () => {

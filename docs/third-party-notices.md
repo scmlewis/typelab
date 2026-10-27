@@ -1,5 +1,9 @@
 # Third-Party Notices
 
+## Quote library
+
+`src/engine/content/quotes.ts` contains short excerpts from English-language works that are in the public domain. Attribution and source titles are shown with each quote in the app. Texts use plain ASCII punctuation so every character can be typed on a standard keyboard.
+
 ## English word lists
 
 `src/engine/content/english-200.ts` and `src/engine/content/english-1k.ts` are deterministic subsets of the word list published by the [apostrophecms/random-words](https://github.com/apostrophecms/random-words) project.

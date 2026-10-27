@@ -18,14 +18,16 @@ export function describeTestConfig(config: TestConfig): string {
       break;
   }
 
-  parts.push(config.vocabulary === 'english-1k' ? 'English 1k' : 'English 200');
+  if (config.mode === 'timed' || config.mode === 'words') {
+    parts.push(config.vocabulary === 'english-1k' ? 'English 1k' : 'English 200');
 
-  if (config.punctuation) {
-    parts.push('punctuation');
-  }
+    if (config.punctuation) {
+      parts.push('punctuation');
+    }
 
-  if (config.numbers) {
-    parts.push('numbers');
+    if (config.numbers) {
+      parts.push('numbers');
+    }
   }
 
   return parts.join(' · ');

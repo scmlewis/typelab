@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router';
 
 import { getCategoryKey, getComparableCategoryKey } from '@/engine/config';
+import { getQuoteById } from '@/engine/content/quotes';
 import { isDegenerateResult } from '@/engine/scoring';
 import type { TestResult } from '@/engine/types';
 import { getResultRepository } from '@/features/history/resultRepository';
@@ -150,6 +151,8 @@ export function ResultDetailPage({ repository }: ResultDetailPageProps) {
   }
 
   const { result, comparison } = state;
+  const quote =
+    result.configuration.mode === 'quote' ? getQuoteById(result.configuration.quoteId) : null;
 
   return (
     <section aria-labelledby="result-title" className="max-w-3xl">
@@ -210,6 +213,11 @@ export function ResultDetailPage({ repository }: ResultDetailPageProps) {
           <p className="mt-4 text-sm leading-6 text-ink-muted">
             {describeTestConfig(result.configuration)}
           </p>
+          {quote ? (
+            <p className="mt-2 text-sm leading-6 text-ink-muted" data-testid="quote-source">
+              <cite>{quote.source}</cite> · {quote.author}
+            </p>
+          ) : null}
           <p className="mt-2 text-xs leading-5 text-ink-muted">
             Error policy: {result.configuration.errorPolicy} · Scoring {result.scoringVersion}
           </p>

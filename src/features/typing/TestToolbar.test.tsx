@@ -1,0 +1,61 @@
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
+
+import { getQuoteById, pickQuote } from '@/engine/content/quotes';
+import { DEFAULT_TIMED_CONFIG } from '@/engine/config';
+import type { QuoteTestConfig } from '@/engine/types';
+import { TestToolbar } from '@/features/typing/TestToolbar';
+
+function quoteConfig(): QuoteTestConfig {
+  return {
+    ...DEFAULT_TIMED_CONFIG,
+    mode: 'quote',
+    durationSeconds: null,
+    wordCount: null,
+    quoteId: pickQuote(3).id,
+    customText: null,
+  };
+}
+
+describe('test toolbar quote mode', () => {
+  it('switches to a quote with a real quote id', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <TestToolbar
+        config={DEFAULT_TIMED_CONFIG}
+        disabled={false}
+        onChange={onChange}
+        onRestart={() => {}}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Quote' }));
+
+    const next = onChange.mock.calls[0]?.[0] as QuoteTestConfig;
+
+    expect(next.mode).toBe('quote');
+    expect(next.durationSeconds).toBeNull();
+    expect(next.wordCount).toBeNull();
+    expect(getQuoteById(next.quoteId)).not.toBeNull();
+  });
+
+  it('hides word-list and modifier controls that do not apply to quotes', () => {
+    render(
+      <TestToolbar
+        config={quoteConfig()}
+        disabled={false}
+        onChange={() => {}}
+        onRestart={() => {}}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Quote' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByLabelText('Vocabulary')).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Modifiers' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Duration' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Word count' })).not.toBeInTheDocument();
+  });
+});

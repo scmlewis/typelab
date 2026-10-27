@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 
+import { getQuoteById, pickQuote } from '@/engine/content/quotes';
 import { generatePrompt } from '@/engine/prompt';
 import type { Prompt, TestConfig } from '@/engine/types';
 import { getTypelabDatabase } from '@/features/history/typelabDatabase';
@@ -21,17 +22,51 @@ interface TestSession {
 }
 
 function createSession(config: TestConfig): TestSession {
-  const prompt = generatePrompt(config);
+  const resolved = ensureKnownQuote(config);
+  const prompt = promptFor(resolved);
 
   return {
-    config,
+    config: resolved,
     prompt,
-    store: new TypingStore({ config, prompt }),
+    store: new TypingStore({ config: resolved, prompt }),
   };
+}
+
+function promptFor(config: TestConfig): Prompt {
+  if (config.mode !== 'quote') {
+    return generatePrompt(config);
+  }
+
+  const quote = getQuoteById(config.quoteId);
+
+  if (quote === null) {
+    throw new Error(`Unknown quote: ${config.quoteId}`);
+  }
+
+  return generatePrompt(config, { quoteText: quote.text });
+}
+
+/** Imported or stale configs may name a quote that no longer exists. */
+function ensureKnownQuote(config: TestConfig): TestConfig {
+  if (config.mode !== 'quote' || getQuoteById(config.quoteId) !== null) {
+    return config;
+  }
+
+  return { ...config, quoteId: pickQuote(config.seed).id };
 }
 
 function randomSeed(): number {
   return Math.floor(Math.random() * 0x1_0000_0000) >>> 0;
+}
+
+function withFreshSeed(config: TestConfig): TestConfig {
+  const seed = randomSeed();
+
+  if (config.mode === 'quote') {
+    return { ...config, seed, quoteId: pickQuote(seed, config.quoteId).id };
+  }
+
+  return { ...config, seed };
 }
 
 export function TypingTest() {
@@ -46,9 +81,9 @@ export function TypingTest() {
   const result = useTypingSelector(session.store, (state) => state.result);
 
   const launch = useCallback((nextConfig: TestConfig, existingPrompt?: Prompt) => {
-    const config: TestConfig =
-      existingPrompt === undefined ? { ...nextConfig, seed: randomSeed() } : nextConfig;
-    const prompt = existingPrompt ?? generatePrompt(config);
+    const config =
+      existingPrompt === undefined ? withFreshSeed(ensureKnownQuote(nextConfig)) : nextConfig;
+    const prompt = existingPrompt ?? promptFor(config);
 
     setSession({
       config,
@@ -147,6 +182,7 @@ export function TypingTest() {
   }, [nextTest]);
 
   const terminal = status === 'completed' || status === 'failed' || status === 'cancelled';
+  const quote = session.config.mode === 'quote' ? getQuoteById(session.config.quoteId) : null;
 
   return (
     <div className="mt-6 rounded-card border border-line bg-surface p-5 shadow-card sm:mt-8 sm:p-8">
@@ -191,6 +227,14 @@ export function TypingTest() {
         <>
           <LiveStats config={session.config} store={session.store} />
           <TypingSurface store={session.store} />
+          {quote ? (
+            <p
+              className="mt-5 text-right font-display text-sm leading-6 text-ink-muted"
+              data-testid="quote-source"
+            >
+              <cite>{quote.source}</cite> · {quote.author}
+            </p>
+          ) : null}
         </>
       )}
 

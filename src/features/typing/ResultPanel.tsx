@@ -1,5 +1,6 @@
 import { ArrowRight, Repeat2 } from 'lucide-react';
 
+import { getQuoteById } from '@/engine/content/quotes';
 import type { EngineStatus, TestResult } from '@/engine/types';
 import {
   describeResultMode,
@@ -19,6 +20,10 @@ interface ResultPanelProps {
 export function ResultPanel({ result, status, onNext, onRepeat }: ResultPanelProps) {
   const cancelled = status === 'cancelled' || result === null;
   const failed = status === 'failed';
+  const quote =
+    result !== null && result.configuration.mode === 'quote'
+      ? getQuoteById(result.configuration.quoteId)
+      : null;
 
   return (
     <section aria-live="polite" className="mt-8 pt-2" data-testid="result-panel">
@@ -76,6 +81,15 @@ export function ResultPanel({ result, status, onNext, onRepeat }: ResultPanelPro
           {result.flags.length > 0 ? (
             <p className="mt-6 rounded-xl bg-accent-soft/60 px-4 py-3 text-xs leading-5 text-ink-muted">
               {describeFlags(result.flags)}
+            </p>
+          ) : null}
+
+          {quote ? (
+            <p
+              className="mt-6 text-right font-display text-sm leading-6 text-ink-muted"
+              data-testid="quote-source"
+            >
+              <cite>{quote.source}</cite> · {quote.author}
             </p>
           ) : null}
         </>

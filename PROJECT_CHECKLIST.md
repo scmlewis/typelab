@@ -49,8 +49,8 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Versioned scoring (`1.0.0`): net/raw WPM, accuracy, char stats, consistency
 - [x] Bounded interval samples persisted for charts
 - [x] Result flags (`no-input`, `under-one-second`, `failed`, `low-confidence`)
-- [ ] Degenerate results excluded from PBs/trends by default
-- [ ] Quote/custom category rules
+- [x] Degenerate results excluded from PBs/trends by default
+- [x] Quote/custom category rules
 - [x] Edge-case tests (zero elapsed, no input, partial intervals, incomplete words)
 
 ### Input and UI
@@ -114,7 +114,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 
 ## Phase 2 — Advanced typing, analytics, and backup
 
-- [ ] Quote mode
+- [x] Quote mode
 - [ ] Custom text mode
 - [ ] Additional languages/language packs
 - [ ] Saved presets

@@ -1,12 +1,13 @@
 import { RotateCcw } from 'lucide-react';
 
+import { pickQuote } from '@/engine/content/quotes';
 import {
   DEFAULT_TIMED_CONFIG,
   DEFAULT_WORDS_CONFIG,
   DURATION_OPTIONS,
   WORD_COUNT_OPTIONS,
 } from '@/engine/config';
-import type { DurationSeconds, TestConfig, WordCount } from '@/engine/types';
+import type { DurationSeconds, QuoteTestConfig, TestConfig, WordCount } from '@/engine/types';
 
 interface TestToolbarProps {
   config: TestConfig;
@@ -25,13 +26,29 @@ export function TestToolbar({ config, disabled, onChange, onRestart }: TestToolb
     seed: config.seed,
   } as const;
 
-  const switchMode = (mode: 'timed' | 'words') => {
+  const switchMode = (mode: 'timed' | 'words' | 'quote') => {
+    if (mode === 'quote') {
+      const next: QuoteTestConfig = {
+        ...shared,
+        mode: 'quote',
+        durationSeconds: null,
+        wordCount: null,
+        quoteId: pickQuote(shared.seed).id,
+        customText: null,
+      };
+
+      onChange(next);
+      return;
+    }
+
     onChange(
       mode === 'timed'
         ? { ...DEFAULT_TIMED_CONFIG, ...shared }
         : { ...DEFAULT_WORDS_CONFIG, ...shared },
     );
   };
+
+  const usesWordOptions = config.mode === 'timed' || config.mode === 'words';
 
   const setDuration = (durationSeconds: DurationSeconds) => {
     if (config.mode === 'timed') {
@@ -69,26 +86,36 @@ export function TestToolbar({ config, disabled, onChange, onRestart }: TestToolb
               switchMode('words');
             }}
           />
+          <ModeButton
+            active={config.mode === 'quote'}
+            disabled={disabled}
+            label="Quote"
+            onClick={() => {
+              switchMode('quote');
+            }}
+          />
         </div>
 
-        <label className="flex min-w-0 flex-1 items-center gap-2 text-xs text-ink-muted sm:order-3 sm:flex-none">
-          <span className="hidden font-mono uppercase tracking-[0.14em] sm:inline">List</span>
-          <select
-            aria-label="Vocabulary"
-            className="min-w-0 flex-1 rounded-full border border-line bg-surface px-2.5 py-2 text-xs text-ink disabled:opacity-50 sm:flex-none sm:px-3 sm:py-1.5"
-            disabled={disabled}
-            onChange={(event) => {
-              onChange({
-                ...config,
-                vocabulary: event.target.value === 'english-1k' ? 'english-1k' : 'english-200',
-              });
-            }}
-            value={config.vocabulary}
-          >
-            <option value="english-200">Top 200</option>
-            <option value="english-1k">Top 1,000</option>
-          </select>
-        </label>
+        {usesWordOptions ? (
+          <label className="flex min-w-0 flex-1 items-center gap-2 text-xs text-ink-muted sm:order-3 sm:flex-none">
+            <span className="hidden font-mono uppercase tracking-[0.14em] sm:inline">List</span>
+            <select
+              aria-label="Vocabulary"
+              className="min-w-0 flex-1 rounded-full border border-line bg-surface px-2.5 py-2 text-xs text-ink disabled:opacity-50 sm:flex-none sm:px-3 sm:py-1.5"
+              disabled={disabled}
+              onChange={(event) => {
+                onChange({
+                  ...config,
+                  vocabulary: event.target.value === 'english-1k' ? 'english-1k' : 'english-200',
+                });
+              }}
+              value={config.vocabulary}
+            >
+              <option value="english-200">Top 200</option>
+              <option value="english-1k">Top 1,000</option>
+            </select>
+          </label>
+        ) : null}
 
         <button
           aria-label="Restart test"
@@ -101,56 +128,62 @@ export function TestToolbar({ config, disabled, onChange, onRestart }: TestToolb
         </button>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mt-0 sm:contents">
-        {config.mode === 'timed' ? (
-          <div aria-label="Duration" className="flex items-center gap-1 sm:order-2" role="group">
-            {DURATION_OPTIONS.map((duration) => (
-              <OptionButton
-                active={config.durationSeconds === duration}
-                disabled={disabled}
-                key={duration}
-                label={String(duration)}
-                onClick={() => {
-                  setDuration(duration);
-                }}
-              />
-            ))}
-          </div>
-        ) : (
-          <div aria-label="Word count" className="flex items-center gap-1 sm:order-2" role="group">
-            {WORD_COUNT_OPTIONS.map((count) => (
-              <OptionButton
-                active={config.wordCount === count}
-                disabled={disabled}
-                key={count}
-                label={String(count)}
-                onClick={() => {
-                  setWordCount(count);
-                }}
-              />
-            ))}
-          </div>
-        )}
+      {usesWordOptions ? (
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mt-0 sm:contents">
+          {config.mode === 'timed' ? (
+            <div aria-label="Duration" className="flex items-center gap-1 sm:order-2" role="group">
+              {DURATION_OPTIONS.map((duration) => (
+                <OptionButton
+                  active={config.durationSeconds === duration}
+                  disabled={disabled}
+                  key={duration}
+                  label={String(duration)}
+                  onClick={() => {
+                    setDuration(duration);
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div
+              aria-label="Word count"
+              className="flex items-center gap-1 sm:order-2"
+              role="group"
+            >
+              {WORD_COUNT_OPTIONS.map((count) => (
+                <OptionButton
+                  active={config.wordCount === count}
+                  disabled={disabled}
+                  key={count}
+                  label={String(count)}
+                  onClick={() => {
+                    setWordCount(count);
+                  }}
+                />
+              ))}
+            </div>
+          )}
 
-        <div aria-label="Modifiers" className="flex items-center gap-1 sm:order-4" role="group">
-          <OptionButton
-            active={config.punctuation}
-            disabled={disabled}
-            label="Punctuation"
-            onClick={() => {
-              onChange({ ...config, punctuation: !config.punctuation });
-            }}
-          />
-          <OptionButton
-            active={config.numbers}
-            disabled={disabled}
-            label="Numbers"
-            onClick={() => {
-              onChange({ ...config, numbers: !config.numbers });
-            }}
-          />
+          <div aria-label="Modifiers" className="flex items-center gap-1 sm:order-4" role="group">
+            <OptionButton
+              active={config.punctuation}
+              disabled={disabled}
+              label="Punctuation"
+              onClick={() => {
+                onChange({ ...config, punctuation: !config.punctuation });
+              }}
+            />
+            <OptionButton
+              active={config.numbers}
+              disabled={disabled}
+              label="Numbers"
+              onClick={() => {
+                onChange({ ...config, numbers: !config.numbers });
+              }}
+            />
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
+import { DEFAULT_TIMED_CONFIG } from '@/engine/config';
+import type { CustomTestConfig, QuoteTestConfig } from '@/engine/types';
 import {
   describeResultMode,
+  describeTestConfig,
   formatCountdown,
   formatDuration,
   formatLanguage,
@@ -51,5 +54,35 @@ describe('describeResultMode', () => {
     expect(describeResultMode({ testMode: 'words', durationMs: 5_000, wordCount: 25 })).toBe(
       '25 words',
     );
+  });
+});
+
+describe('describeTestConfig', () => {
+  it('lists vocabulary and modifiers only for generated text', () => {
+    expect(
+      describeTestConfig({ ...DEFAULT_TIMED_CONFIG, punctuation: true, vocabulary: 'english-1k' }),
+    ).toBe('30 seconds · English 1k · punctuation');
+  });
+
+  it('describes quote and custom runs without word-list settings', () => {
+    const quote: QuoteTestConfig = {
+      ...DEFAULT_TIMED_CONFIG,
+      mode: 'quote',
+      durationSeconds: null,
+      wordCount: null,
+      quoteId: 'austen-pride-01',
+      customText: null,
+      punctuation: true,
+      numbers: true,
+    };
+    const custom: CustomTestConfig = {
+      ...quote,
+      mode: 'custom',
+      quoteId: null,
+      customText: 'One two three',
+    };
+
+    expect(describeTestConfig(quote)).toBe('Quote');
+    expect(describeTestConfig(custom)).toBe('Custom text');
   });
 });

@@ -102,6 +102,24 @@ test('a dark theme persists and reaches the bench', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 });
 
+test('a quote run completes and keeps its source', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Quote', exact: true }).click();
+
+  const words = await page.locator('[data-word-index]').allTextContents();
+  expect(words.length).toBeGreaterThan(8);
+
+  const source = await page.getByTestId('quote-source').textContent();
+  expect(source?.trim().length).toBeGreaterThan(3);
+
+  await page.getByLabel('Typing input').focus();
+  await page.keyboard.type(words.join(' '));
+
+  await expect(page.getByTestId('result-panel')).toBeVisible();
+  await expect(page.getByTestId('save-status')).toHaveAttribute('data-save-status', 'saved');
+  await expect(page.getByTestId('quote-source')).toHaveText(source ?? '');
+});
+
 test('a completed run survives a reload in local history', async ({ page }) => {
   await runTenWords(page);
 
