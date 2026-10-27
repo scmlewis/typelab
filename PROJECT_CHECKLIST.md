@@ -55,14 +55,14 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 
 ### Input and UI
 
-- [ ] Hidden textarea input receptor
-- [ ] `input`/`beforeinput` handling
-- [ ] Composition/IME handling
-- [ ] Backspace dedupe
+- [x] Hidden textarea input receptor
+- [x] `input`/`beforeinput` handling
+- [x] Composition/IME handling
+- [x] Backspace dedupe
 - [ ] Space/backspace scroll prevention
-- [ ] Shortcut filtering
-- [ ] Focus-loss recovery
-- [ ] Paste rejection
+- [x] Shortcut filtering
+- [x] Focus-loss recovery
+- [x] Paste rejection
 - [ ] Mobile keyboard path
 - [ ] External store + selectors
 - [ ] rAF ticker + 10 Hz stats quantisation

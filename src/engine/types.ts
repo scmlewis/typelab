@@ -81,6 +81,9 @@ export interface CharacterStatistics {
 
 export type ResultFlag = 'no-input' | 'under-one-second' | 'failed' | 'low-confidence';
 
+export type EngineInput =
+  { type: 'insert'; text: string } | { type: 'backspace' } | { type: 'cancel' };
+
 export type EngineStatus = 'idle' | 'running' | 'completed' | 'failed' | 'cancelled';
 
 export interface EngineSnapshot {
