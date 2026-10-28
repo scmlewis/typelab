@@ -85,6 +85,18 @@ describe('history page', () => {
     expect(link).toHaveAttribute('href', '/results/result-1');
   });
 
+  it('charts progress when more than one run matches', async () => {
+    const repository = createRepository([
+      makeResult({ id: 'result-2', netWpm: 65, completedAt: '2026-10-28T12:00:00.000Z' }),
+      makeResult(),
+    ]);
+
+    renderPage(repository);
+
+    expect(await screen.findByRole('heading', { name: /progress over time/i })).toBeInTheDocument();
+    expect(screen.getByText(/latest 65 wpm/i)).toBeInTheDocument();
+  });
+
   it('shows an empty state when nothing matches', async () => {
     const repository = createRepository([]);
 

@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { Link } from 'react-router';
 
 import type { TestMode } from '@/engine/types';
+import { TrendChart } from '@/features/history/TrendChart';
 import { getResultRepository } from '@/features/history/resultRepository';
 import type {
   HistoryPage as HistoryPageData,
@@ -172,6 +173,8 @@ export function HistoryPage({ repository }: HistoryPageProps) {
           </p>
         </div>
       ) : null}
+
+      {page && page.items.length > 1 ? <TrendChart results={page.items} /> : null}
 
       {page && page.items.length > 0 ? (
         <ul className="mt-2 divide-y divide-line/70">

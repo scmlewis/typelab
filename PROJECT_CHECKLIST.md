@@ -128,7 +128,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Speed chart from interval samples
 - [x] Detailed result analysis
 - [x] History page + filters
-- [ ] Trend charts
+- [x] Trend charts (net WPM + accuracy across filtered runs)
 - [ ] Personal bests per category
 - [ ] Pagination/incremental loading
 - [x] JSON backup export/import with preview and duplicate merge

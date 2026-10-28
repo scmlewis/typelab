@@ -124,7 +124,8 @@ export function SettingsProvider({ children, repository }: SettingsProviderProps
         if (mounted.current) {
           setState((previous) => ({
             ...previous,
-            error: 'Could not save appearance settings. This choice applies for the current session.',
+            error:
+              'Could not save appearance settings. This choice applies for the current session.',
           }));
         }
       }
