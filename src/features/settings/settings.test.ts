@@ -21,6 +21,53 @@ describe('settings schema', () => {
     );
   });
 
+  it('fills typography, caret, and sound defaults into an older appearance payload', () => {
+    const parsed = settingsSchema.parse({
+      ...DEFAULT_SETTINGS,
+      appearance: { theme: 'dark' },
+    });
+
+    expect(parsed.appearance).toEqual({
+      theme: 'dark',
+      fontFamily: 'mono',
+      fontSize: 'medium',
+      textWidth: 'default',
+      caret: { style: 'line', blink: true },
+      sounds: { enabled: false, volume: 0.5 },
+    });
+  });
+
+  it('rejects unsupported typography and caret values', () => {
+    expect(
+      settingsSchema.safeParse({
+        ...DEFAULT_SETTINGS,
+        appearance: { ...DEFAULT_SETTINGS.appearance, fontFamily: 'comic' },
+      }).success,
+    ).toBe(false);
+
+    expect(
+      settingsSchema.safeParse({
+        ...DEFAULT_SETTINGS,
+        appearance: {
+          ...DEFAULT_SETTINGS.appearance,
+          caret: { style: 'beam', blink: true },
+        },
+      }).success,
+    ).toBe(false);
+  });
+
+  it('clamps sound volume to the audible range', () => {
+    expect(
+      settingsSchema.safeParse({
+        ...DEFAULT_SETTINGS,
+        appearance: {
+          ...DEFAULT_SETTINGS.appearance,
+          sounds: { enabled: true, volume: 1.4 },
+        },
+      }).success,
+    ).toBe(false);
+  });
+
   it('rejects unsupported durations and word counts', () => {
     expect(
       settingsSchema.safeParse({
@@ -53,7 +100,33 @@ describe('settings migration', () => {
     const legacy = { testDefaults: DEFAULT_SETTINGS.testDefaults };
 
     expect(migrateSettings(1, legacy)).toEqual(DEFAULT_SETTINGS);
-    expect(SETTINGS_SCHEMA_VERSION).toBe(2);
+    expect(SETTINGS_SCHEMA_VERSION).toBe(3);
+  });
+
+  it('migrates version 2 by adding typography, caret, and sound defaults', () => {
+    const legacy = {
+      testDefaults: {
+        ...DEFAULT_SETTINGS.testDefaults,
+        mode: 'words',
+        wordCount: 50,
+      },
+      appearance: { theme: 'dark' },
+    };
+
+    expect(migrateSettings(2, legacy)).toEqual({
+      ...DEFAULT_SETTINGS,
+      testDefaults: legacy.testDefaults,
+      appearance: { ...DEFAULT_SETTINGS.appearance, theme: 'dark' },
+    });
+  });
+
+  it('rejects a version 2 payload with an unknown theme', () => {
+    expect(
+      migrateSettings(2, {
+        testDefaults: DEFAULT_SETTINGS.testDefaults,
+        appearance: { theme: 'sepia' },
+      }),
+    ).toBeNull();
   });
 
   it('accepts current settings unchanged', () => {

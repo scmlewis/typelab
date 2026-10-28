@@ -54,6 +54,8 @@ function Harness() {
       <p data-testid="mode">{settings.testDefaults.mode}</p>
       <p data-testid="count">{settings.testDefaults.wordCount}</p>
       <p data-testid="theme">{settings.appearance.theme}</p>
+      <p data-testid="font">{settings.appearance.fontFamily}</p>
+      <p data-testid="sounds">{settings.appearance.sounds.enabled ? 'on' : 'off'}</p>
       <p data-testid="notice">{notice ?? 'none'}</p>
       <p data-testid="error">{error ?? 'none'}</p>
       <button
@@ -219,7 +221,44 @@ describe('settings provider', () => {
     await user.click(screen.getByRole('button', { name: 'Dark theme' }));
 
     expect(screen.getByTestId('theme')).toHaveTextContent('dark');
-    expect(save).toHaveBeenCalledWith({ ...DEFAULT_SETTINGS, appearance: { theme: 'dark' } });
+    expect(save).toHaveBeenCalledWith({
+      ...DEFAULT_SETTINGS,
+      appearance: { ...DEFAULT_SETTINGS.appearance, theme: 'dark' },
+    });
+  });
+
+  it('merges a theme update without dropping typography or sound choices', async () => {
+    const user = userEvent.setup();
+    const { repository, save } = createRepository({
+      settings: {
+        ...DEFAULT_SETTINGS,
+        appearance: {
+          ...DEFAULT_SETTINGS.appearance,
+          fontFamily: 'serif',
+          sounds: { enabled: true, volume: 0.8 },
+        },
+      },
+    });
+
+    renderProvider(repository);
+    await waitFor(() => {
+      expect(screen.getByTestId('font')).toHaveTextContent('serif');
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Dark theme' }));
+
+    expect(screen.getByTestId('theme')).toHaveTextContent('dark');
+    expect(screen.getByTestId('font')).toHaveTextContent('serif');
+    expect(screen.getByTestId('sounds')).toHaveTextContent('on');
+    expect(save).toHaveBeenCalledWith({
+      ...DEFAULT_SETTINGS,
+      appearance: {
+        ...DEFAULT_SETTINGS.appearance,
+        fontFamily: 'serif',
+        sounds: { enabled: true, volume: 0.8 },
+        theme: 'dark',
+      },
+    });
   });
 
   it('replaces the full settings document', async () => {

@@ -263,7 +263,7 @@ export function TypingTest() {
       ) : (
         <>
           <LiveStats config={session.config} store={session.store} />
-          <TypingSurface store={session.store} />
+          <TypingSurface appearance={settings.appearance} store={session.store} />
           {quote ? (
             <p
               className="mt-5 text-right font-display text-sm leading-6 text-ink-muted"

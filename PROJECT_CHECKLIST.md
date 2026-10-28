@@ -83,7 +83,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Missing-result state
 - [x] Refresh recovery
 - [x] Settings repository + localStorage
-- [x] Settings schema versioning/migration (v1 → v2 adds appearance)
+- [x] Settings schema versioning/migration (v1 → v2 appearance, v2 → v3 typography/caret/sounds)
 - [x] Result repository + Dexie
 - [x] History query for personal bests
 - [x] History page with mode filter and excluded-run toggle
@@ -102,6 +102,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] E2E: refresh recovery
 - [x] E2E: result detail + personal best
 - [x] E2E: theme choice persists across a reload
+- [x] E2E: typography, caret, and sound settings persist across a reload
 - [ ] E2E: responsive layout + keyboard navigation
 - [ ] Accessibility smoke (axe)
 - [ ] Reduced-motion check
@@ -119,7 +120,8 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [ ] Additional languages/language packs
 - [ ] Saved presets
 - [x] Theme setting (light, dark, system) with pre-paint boot and migration
-- [ ] Full settings (palette, fonts, width, caret, sounds)
+- [x] Typography, text width, caret style/blink, and opt-in key sounds
+- [ ] Custom colour palette
 - [ ] Live stats visibility, error highlighting, quick restart
 - [ ] Reduced-motion preference
 - [x] Settings import/export + reset

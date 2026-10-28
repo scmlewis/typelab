@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
@@ -74,9 +74,127 @@ describe('settings page', () => {
 
     expect(save).toHaveBeenCalledWith({
       ...DEFAULT_SETTINGS,
-      appearance: { theme: 'dark' },
+      appearance: { ...DEFAULT_SETTINGS.appearance, theme: 'dark' },
     });
     expect(screen.getByRole('button', { name: 'Dark' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('shows saved typography, caret, and sound preferences', async () => {
+    const repository: SettingsRepositoryLike = {
+      load: vi.fn(() =>
+        Promise.resolve({
+          settings: {
+            ...DEFAULT_SETTINGS,
+            appearance: {
+              ...DEFAULT_SETTINGS.appearance,
+              fontFamily: 'serif' as const,
+              fontSize: 'large' as const,
+              textWidth: 'wide' as const,
+              caret: { style: 'block' as const, blink: false },
+              sounds: { enabled: true, volume: 0.7 },
+            },
+          },
+          notice: null,
+        }),
+      ),
+      save: vi.fn(() => Promise.resolve()),
+      reset: vi.fn(() => Promise.resolve()),
+    };
+
+    renderPage(repository);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Serif' })).toHaveAttribute('aria-pressed', 'true');
+    });
+    expect(screen.getByRole('button', { name: 'Large' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Wide' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Block' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByLabelText('Blink caret')).not.toBeChecked();
+    expect(screen.getByLabelText('Key sounds')).toBeChecked();
+    expect(screen.getByLabelText('Key sound volume')).toHaveValue('70');
+  });
+
+  it('saves typography and caret choices without touching theme', async () => {
+    const user = userEvent.setup();
+    const { repository, save } = createRepository();
+
+    renderPage(repository);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Mono' })).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Sans' }));
+    expect(save).toHaveBeenLastCalledWith({
+      ...DEFAULT_SETTINGS,
+      appearance: { ...DEFAULT_SETTINGS.appearance, fontFamily: 'sans' },
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Large' }));
+    expect(save).toHaveBeenLastCalledWith({
+      ...DEFAULT_SETTINGS,
+      appearance: { ...DEFAULT_SETTINGS.appearance, fontFamily: 'sans', fontSize: 'large' },
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Wide' }));
+    expect(save).toHaveBeenLastCalledWith({
+      ...DEFAULT_SETTINGS,
+      appearance: {
+        ...DEFAULT_SETTINGS.appearance,
+        fontFamily: 'sans',
+        fontSize: 'large',
+        textWidth: 'wide',
+      },
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Underline' }));
+    await user.click(screen.getByLabelText('Blink caret'));
+
+    expect(save).toHaveBeenLastCalledWith({
+      ...DEFAULT_SETTINGS,
+      appearance: {
+        ...DEFAULT_SETTINGS.appearance,
+        fontFamily: 'sans',
+        fontSize: 'large',
+        textWidth: 'wide',
+        caret: { style: 'underline', blink: false },
+      },
+    });
+  });
+
+  it('saves opt-in key sounds and their volume', async () => {
+    const user = userEvent.setup();
+    const { repository, save } = createRepository();
+
+    renderPage(repository);
+    await waitFor(() => {
+      expect(screen.getByLabelText('Key sounds')).not.toBeChecked();
+    });
+
+    await user.click(screen.getByLabelText('Key sounds'));
+
+    expect(screen.getByLabelText('Key sound volume')).not.toBeDisabled();
+
+    expect(save).toHaveBeenLastCalledWith({
+      ...DEFAULT_SETTINGS,
+      appearance: {
+        ...DEFAULT_SETTINGS.appearance,
+        sounds: { enabled: true, volume: 0.5 },
+      },
+    });
+
+    fireEvent.input(screen.getByLabelText('Key sound volume'), {
+      target: { value: '35' },
+    });
+
+    await waitFor(() => {
+      expect(save).toHaveBeenLastCalledWith({
+        ...DEFAULT_SETTINGS,
+        appearance: {
+          ...DEFAULT_SETTINGS.appearance,
+          sounds: { enabled: true, volume: 0.35 },
+        },
+      });
+    });
   });
 
   it('saves a change immediately', async () => {

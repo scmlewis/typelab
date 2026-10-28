@@ -10,7 +10,7 @@ export interface SettingsContextValue {
   notice: SettingsNotice | null;
   error: string | null;
   updateTestDefaults: (defaults: TestDefaults) => Promise<void>;
-  updateAppearance: (appearance: Appearance) => Promise<void>;
+  updateAppearance: (appearance: Partial<Appearance>) => Promise<void>;
   replaceSettings: (settings: AppSettings) => Promise<void>;
   resetSettings: () => Promise<void>;
   dismissNotice: () => void;

@@ -2,17 +2,52 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 
 import { InputAdapter } from '@/engine/input';
+import { DEFAULT_SETTINGS } from '@/features/settings/settings';
+import type {
+  Appearance,
+  CaretSettings,
+  TypingFontFamily,
+  TypingFontSize,
+  TypingTextWidth,
+} from '@/features/settings/settings';
+import { TypingSounds } from '@/features/typing/sounds';
+import type { SoundPlayer } from '@/features/typing/sounds';
 import { useTypingSelector } from '@/features/typing/useTypingSelector';
 import type { TypingStore } from '@/features/typing/typingStore';
 
 const WINDOW_BEFORE = 20;
 const WINDOW_SIZE = 140;
 
+const FONT_CLASS: Record<TypingFontFamily, string> = {
+  mono: 'font-mono',
+  sans: 'font-sans',
+  serif: 'font-serif',
+};
+
+const SIZE_CLASS: Record<TypingFontSize, string> = {
+  small: 'text-xl sm:text-2xl',
+  medium: 'text-2xl sm:text-3xl',
+  large: 'text-3xl sm:text-4xl',
+};
+
+const WIDTH_CLASS: Record<TypingTextWidth, string> = {
+  narrow: 'max-w-2xl',
+  default: 'max-w-3xl',
+  wide: 'max-w-none',
+};
+
 interface TypingSurfaceProps {
   store: TypingStore;
+  appearance?: Appearance;
+  /** Test seam; production surfaces create their own opt-in sound player. */
+  soundPlayer?: SoundPlayer;
 }
 
-export function TypingSurface({ store }: TypingSurfaceProps) {
+export function TypingSurface({
+  store,
+  appearance = DEFAULT_SETTINGS.appearance,
+  soundPlayer,
+}: TypingSurfaceProps) {
   const revision = useTypingSelector(store, (state) => state.revision);
   const snapshot = store.getState().snapshot;
   const [focused, setFocused] = useState(false);
@@ -20,6 +55,25 @@ export function TypingSurface({ store }: TypingSurfaceProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const activeWordRef = useRef<HTMLSpanElement>(null);
+  const soundsRef = useRef<TypingSounds | null>(null);
+
+  if (soundsRef.current === null) {
+    soundsRef.current = new TypingSounds(appearance.sounds);
+  }
+
+  const player = soundPlayer ?? soundsRef.current;
+
+  useEffect(() => {
+    soundsRef.current?.setPreferences(appearance.sounds);
+  }, [appearance.sounds]);
+
+  useEffect(() => {
+    const sounds = soundsRef.current;
+
+    return () => {
+      sounds?.dispose();
+    };
+  }, []);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -31,6 +85,23 @@ export function TypingSurface({ store }: TypingSurfaceProps) {
     const adapter = new InputAdapter({
       textarea,
       onInput: (input) => {
+        if (input.type === 'insert') {
+          const state = store.getState().snapshot;
+          const target = state.prompt.words[state.activeWordIndex] ?? '';
+          const typed = state.typedInputs[state.activeWordIndex] ?? '';
+          const character = input.text.charAt(0);
+
+          player.play(
+            character === ' ' || character === target.charAt(typed.length)
+              ? 'correct'
+              : 'incorrect',
+          );
+        } else if (input.type === 'backspace') {
+          player.play('backspace');
+        } else {
+          return;
+        }
+
         store.input(input);
       },
       isActive: () => {
@@ -63,7 +134,7 @@ export function TypingSurface({ store }: TypingSurfaceProps) {
     return () => {
       adapter.detach();
     };
-  }, [store]);
+  }, [player, store]);
 
   useEffect(() => {
     if (notice === null) {
@@ -102,12 +173,22 @@ export function TypingSurface({ store }: TypingSurfaceProps) {
   return (
     <div className="relative mt-5 sm:mt-6">
       <div
-        className="relative h-[9.45rem] overflow-hidden sm:h-[11.8125rem]"
+        className={[
+          'relative h-[6.3em] overflow-hidden',
+          FONT_CLASS[appearance.fontFamily],
+          SIZE_CLASS[appearance.fontSize],
+          WIDTH_CLASS[appearance.textWidth],
+        ].join(' ')}
+        data-caret-blink={appearance.caret.blink}
+        data-caret-style={appearance.caret.style}
+        data-font-family={appearance.fontFamily}
+        data-font-size={appearance.fontSize}
         data-testid="typing-surface"
         data-status={status}
+        data-text-width={appearance.textWidth}
       >
         <div
-          className="font-mono text-2xl leading-[2.1] tracking-tight text-ink sm:text-3xl"
+          className="leading-[2.1] tracking-tight text-ink"
           ref={containerRef}
           style={{ height: '100%', overflow: 'hidden' }}
         >
@@ -119,6 +200,7 @@ export function TypingSurface({ store }: TypingSurfaceProps) {
               return (
                 <Word
                   activeRef={isActive ? activeWordRef : undefined}
+                  caret={appearance.caret}
                   isActive={isActive}
                   isPast={wordIndex < snapshot.activeWordIndex}
                   key={wordIndex}
@@ -172,16 +254,17 @@ interface WordProps {
   wordIndex: number;
   isActive: boolean;
   isPast: boolean;
+  caret: CaretSettings;
   activeRef: RefObject<HTMLSpanElement | null> | undefined;
 }
 
-function Word({ target, typed, wordIndex, isActive, isPast, activeRef }: WordProps) {
+function Word({ target, typed, wordIndex, isActive, isPast, caret, activeRef }: WordProps) {
   const length = Math.max(target.length, typed.length);
   const characters: ReactNode[] = [];
 
   for (let index = 0; index < length; index += 1) {
     if (isActive && index === typed.length) {
-      characters.push(<Caret key={`caret-${index}`} />);
+      characters.push(<Caret caret={caret} key={`caret-${index}`} />);
     }
 
     const typedCharacter = index < typed.length ? typed.charAt(index) : null;
@@ -196,7 +279,7 @@ function Word({ target, typed, wordIndex, isActive, isPast, activeRef }: WordPro
   }
 
   if (isActive && typed.length >= length) {
-    characters.push(<Caret key="caret-end" />);
+    characters.push(<Caret caret={caret} key="caret-end" />);
   }
 
   return (
@@ -213,12 +296,27 @@ function Word({ target, typed, wordIndex, isActive, isPast, activeRef }: WordPro
   );
 }
 
-function Caret() {
+function Caret({ caret }: { caret: CaretSettings }) {
   return (
     <span
       aria-hidden="true"
-      className="typing-caret relative -mb-[0.1em] ml-[1px] inline-block h-[1.05em] w-[2px] translate-y-[0.12em] bg-accent"
-    />
+      className={[
+        'relative -mb-[0.1em] ml-[1px] inline-block h-[1.05em] translate-y-[0.12em]',
+        caret.style === 'line' ? 'w-[2px]' : 'w-[0.6ch]',
+      ].join(' ')}
+      data-style={caret.style}
+      data-testid="typing-caret"
+    >
+      <span
+        className={[
+          'absolute bg-accent',
+          caret.style === 'line' ? 'inset-y-0 left-0 w-[2px]' : '',
+          caret.style === 'block' ? 'inset-0 rounded-[2px] opacity-60' : '',
+          caret.style === 'underline' ? 'bottom-0 left-0 h-[0.12em] w-full' : '',
+          caret.blink ? 'typing-caret' : '',
+        ].join(' ')}
+      />
+    </span>
   );
 }
 

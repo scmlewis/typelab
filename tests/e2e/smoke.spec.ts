@@ -102,6 +102,38 @@ test('a dark theme persists and reaches the bench', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 });
 
+test('typography, caret, and sound settings persist and reach the bench', async ({ page }) => {
+  await page.goto('/settings');
+
+  await page.getByRole('button', { name: 'Serif', exact: true }).click();
+  await page.getByRole('button', { name: 'Large', exact: true }).click();
+  await page.getByRole('button', { name: 'Wide', exact: true }).click();
+  await page.getByRole('button', { name: 'Block', exact: true }).click();
+  await page.getByLabel('Blink caret').uncheck();
+  await page.getByLabel('Key sounds').check();
+
+  await page.reload();
+
+  await expect(page.getByRole('button', { name: 'Serif', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(page.getByRole('button', { name: 'Large', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(page.getByLabel('Key sounds')).toBeChecked();
+
+  await page.getByRole('link', { name: 'Test', exact: true }).click();
+
+  const surface = page.getByTestId('typing-surface');
+  await expect(surface).toHaveAttribute('data-font-family', 'serif');
+  await expect(surface).toHaveAttribute('data-font-size', 'large');
+  await expect(surface).toHaveAttribute('data-text-width', 'wide');
+  await expect(surface).toHaveAttribute('data-caret-style', 'block');
+  await expect(surface).toHaveAttribute('data-caret-blink', 'false');
+});
+
 test('a quote run completes and keeps its source', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Quote', exact: true }).click();

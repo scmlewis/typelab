@@ -1,11 +1,20 @@
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 
 import { DURATION_OPTIONS, WORD_COUNT_OPTIONS } from '@/engine/config';
 import type { ErrorPolicy } from '@/engine/types';
 import { BackupPanel } from '@/features/history/BackupPanel';
 import { DEFAULT_SETTINGS } from '@/features/settings/settings';
-import type { TestDefaults, ThemePreference } from '@/features/settings/settings';
+import type {
+  Appearance,
+  CaretStyle,
+  TestDefaults,
+  ThemePreference,
+  TypingFontFamily,
+  TypingFontSize,
+  TypingTextWidth,
+} from '@/features/settings/settings';
 import { useSettings } from '@/features/settings/settingsContext';
 
 const ERROR_POLICIES: readonly { value: ErrorPolicy; label: string; hint: string }[] = [
@@ -24,6 +33,30 @@ const THEMES: readonly { value: ThemePreference; label: string }[] = [
   { value: 'system', label: 'System' },
 ];
 
+const FONTS: readonly { value: TypingFontFamily; label: string }[] = [
+  { value: 'mono', label: 'Mono' },
+  { value: 'sans', label: 'Sans' },
+  { value: 'serif', label: 'Serif' },
+];
+
+const FONT_SIZES: readonly { value: TypingFontSize; label: string }[] = [
+  { value: 'small', label: 'Small' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'large', label: 'Large' },
+];
+
+const TEXT_WIDTHS: readonly { value: TypingTextWidth; label: string }[] = [
+  { value: 'narrow', label: 'Narrow' },
+  { value: 'default', label: 'Default' },
+  { value: 'wide', label: 'Wide' },
+];
+
+const CARET_STYLES: readonly { value: CaretStyle; label: string }[] = [
+  { value: 'line', label: 'Line' },
+  { value: 'block', label: 'Block' },
+  { value: 'underline', label: 'Underline' },
+];
+
 export function SettingsPage() {
   const { settings, status, updateTestDefaults, updateAppearance, resetSettings } = useSettings();
   const [confirmingReset, setConfirmingReset] = useState(false);
@@ -32,6 +65,10 @@ export function SettingsPage() {
 
   const save = (next: Partial<TestDefaults>) => {
     void updateTestDefaults({ ...defaults, ...next });
+  };
+
+  const saveAppearance = (next: Partial<Appearance>) => {
+    void updateAppearance(next);
   };
 
   const handleReset = () => {
@@ -94,6 +131,127 @@ export function SettingsPage() {
           <p className="max-w-xs text-xs leading-5 text-ink-muted">
             System follows your device&apos;s light or dark setting.
           </p>
+        </div>
+      </fieldset>
+
+      <fieldset
+        className="mt-8 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
+        disabled={status === 'loading'}
+      >
+        <legend className="sr-only">Typography and typing</legend>
+        <p
+          aria-hidden="true"
+          className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-ink-muted"
+        >
+          Typography &amp; typing
+        </p>
+
+        <div className="mt-5 flex flex-wrap items-start gap-x-8 gap-y-5">
+          <Group label="Font">
+            {FONTS.map((font) => (
+              <Choice
+                active={appearance.fontFamily === font.value}
+                key={font.value}
+                label={font.label}
+                onClick={() => {
+                  saveAppearance({ fontFamily: font.value });
+                }}
+              />
+            ))}
+          </Group>
+
+          <Group label="Size">
+            {FONT_SIZES.map((size) => (
+              <Choice
+                active={appearance.fontSize === size.value}
+                key={size.value}
+                label={size.label}
+                onClick={() => {
+                  saveAppearance({ fontSize: size.value });
+                }}
+              />
+            ))}
+          </Group>
+
+          <Group label="Text width">
+            {TEXT_WIDTHS.map((width) => (
+              <Choice
+                active={appearance.textWidth === width.value}
+                key={width.value}
+                label={width.label}
+                onClick={() => {
+                  saveAppearance({ textWidth: width.value });
+                }}
+              />
+            ))}
+          </Group>
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-start gap-x-8 gap-y-5 border-t border-line/70 pt-5">
+          <div>
+            <Group label="Caret">
+              {CARET_STYLES.map((caret) => (
+                <Choice
+                  active={appearance.caret.style === caret.value}
+                  key={caret.value}
+                  label={caret.label}
+                  onClick={() => {
+                    saveAppearance({ caret: { ...appearance.caret, style: caret.value } });
+                  }}
+                />
+              ))}
+            </Group>
+            <div className="mt-3">
+              <Check
+                checked={appearance.caret.blink}
+                label="Blink caret"
+                onChange={(checked) => {
+                  saveAppearance({ caret: { ...appearance.caret, blink: checked } });
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="max-w-xs">
+            <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">
+              Sound
+            </p>
+            <div className="mt-2">
+              <Check
+                checked={appearance.sounds.enabled}
+                label="Key sounds"
+                onChange={(checked) => {
+                  saveAppearance({ sounds: { ...appearance.sounds, enabled: checked } });
+                }}
+              />
+            </div>
+            <div className="mt-3 flex items-center gap-3">
+              <label className="text-xs text-ink-muted" htmlFor="sound-volume">
+                Key sound volume
+              </label>
+              <input
+                className="h-1.5 w-28 accent-ink disabled:opacity-40"
+                disabled={!appearance.sounds.enabled}
+                id="sound-volume"
+                max={100}
+                min={0}
+                onChange={(event) => {
+                  saveAppearance({
+                    sounds: { ...appearance.sounds, volume: Number(event.target.value) / 100 },
+                  });
+                }}
+                step={5}
+                type="range"
+                value={Math.round(appearance.sounds.volume * 100)}
+              />
+              <span className="w-8 font-mono text-xs text-ink-muted">
+                {Math.round(appearance.sounds.volume * 100)}%
+              </span>
+            </div>
+            <p className="mt-2 text-xs leading-5 text-ink-muted">
+              Sounds play only on this device, after you enable them.
+            </p>
+          </div>
         </div>
       </fieldset>
 
@@ -308,6 +466,17 @@ export function SettingsPage() {
         </div>
       </div>
     </section>
+  );
+}
+
+function Group({ children, label }: { children: ReactNode; label: string }) {
+  return (
+    <div>
+      <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">{label}</p>
+      <div aria-label={label} className="mt-2 flex gap-1" role="group">
+        {children}
+      </div>
+    </div>
   );
 }
 

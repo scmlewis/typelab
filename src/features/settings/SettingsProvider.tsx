@@ -110,8 +110,11 @@ export function SettingsProvider({ children, repository }: SettingsProviderProps
   );
 
   const updateAppearance = useCallback(
-    async (appearance: Appearance) => {
-      const next: AppSettings = { ...settingsRef.current, appearance };
+    async (appearance: Partial<Appearance>) => {
+      const next: AppSettings = {
+        ...settingsRef.current,
+        appearance: { ...settingsRef.current.appearance, ...appearance },
+      };
       settingsRef.current = next;
       setState((previous) => ({ ...previous, settings: next, error: null }));
 
