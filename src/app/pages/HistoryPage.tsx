@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { Link } from 'react-router';
 
 import type { TestMode } from '@/engine/types';
-import { TrendChart } from '@/features/history/TrendChart';
 import { getResultRepository } from '@/features/history/resultRepository';
 import type {
   HistoryPage as HistoryPageData,
@@ -23,6 +22,13 @@ const MODE_FILTERS: readonly { value: 'all' | TestMode; label: string }[] = [
   { value: 'quote', label: 'Quote' },
   { value: 'custom', label: 'Custom' },
 ];
+
+/** The chart library is only needed once a second run exists. */
+const TrendChart = lazy(async () => {
+  const module = await import('@/features/history/TrendChart');
+
+  return { default: module.TrendChart };
+});
 
 interface HistoryRepository {
   list(query?: HistoryQuery): Promise<HistoryPageData>;
@@ -174,7 +180,17 @@ export function HistoryPage({ repository }: HistoryPageProps) {
         </div>
       ) : null}
 
-      {page && page.items.length > 1 ? <TrendChart results={page.items} /> : null}
+      {page && page.items.length > 1 ? (
+        <Suspense
+          fallback={
+            <p className="mt-8 text-sm text-ink-muted" role="status">
+              Drawing the trend…
+            </p>
+          }
+        >
+          <TrendChart results={page.items} />
+        </Suspense>
+      ) : null}
 
       {page && page.items.length > 0 ? (
         <ul className="mt-2 divide-y divide-line/70">
