@@ -111,6 +111,8 @@ test('typography, caret, and sound settings persist and reach the bench', async 
   await page.getByRole('button', { name: 'Block', exact: true }).click();
   await page.getByLabel('Blink caret').uncheck();
   await page.getByLabel('Key sounds').check();
+  await page.getByLabel('Key sound volume').focus();
+  await page.keyboard.press('ArrowLeft');
 
   await page.reload();
 
@@ -123,6 +125,7 @@ test('typography, caret, and sound settings persist and reach the bench', async 
     'true',
   );
   await expect(page.getByLabel('Key sounds')).toBeChecked();
+  await expect(page.getByLabel('Key sound volume')).toHaveValue('45');
 
   await page.getByRole('link', { name: 'Test', exact: true }).click();
 

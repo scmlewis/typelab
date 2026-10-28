@@ -85,24 +85,39 @@ export function TypingSurface({
     const adapter = new InputAdapter({
       textarea,
       onInput: (input) => {
-        if (input.type === 'insert') {
-          const state = store.getState().snapshot;
-          const target = state.prompt.words[state.activeWordIndex] ?? '';
-          const typed = state.typedInputs[state.activeWordIndex] ?? '';
-          const character = input.text.charAt(0);
+        const before = store.getState().snapshot;
 
-          player.play(
-            character === ' ' || character === target.charAt(typed.length)
-              ? 'correct'
-              : 'incorrect',
-          );
-        } else if (input.type === 'backspace') {
-          player.play('backspace');
-        } else {
+        store.input(input);
+
+        if (input.type === 'cancel') {
           return;
         }
 
-        store.input(input);
+        const after = store.getState().snapshot;
+
+        if (input.type === 'backspace') {
+          const changed =
+            after.activeWordIndex !== before.activeWordIndex ||
+            after.typedInputs.some((value, index) => value !== before.typedInputs[index]);
+
+          if (changed) {
+            player.play('backspace');
+          }
+
+          return;
+        }
+
+        const attempts = after.attempts.slice(before.attempts.length);
+
+        if (attempts.length === 0) {
+          return;
+        }
+
+        player.play(
+          attempts.every((attempt) => attempt.kind === 'correct' || attempt.kind === 'separator')
+            ? 'correct'
+            : 'incorrect',
+        );
       },
       isActive: () => {
         const status = store.getState().snapshot.status;
@@ -177,7 +192,6 @@ export function TypingSurface({
           'relative h-[6.3em] overflow-hidden',
           FONT_CLASS[appearance.fontFamily],
           SIZE_CLASS[appearance.fontSize],
-          WIDTH_CLASS[appearance.textWidth],
         ].join(' ')}
         data-caret-blink={appearance.caret.blink}
         data-caret-style={appearance.caret.style}
@@ -188,7 +202,11 @@ export function TypingSurface({
         data-text-width={appearance.textWidth}
       >
         <div
-          className="leading-[2.1] tracking-tight text-ink"
+          className={[
+            'mx-auto h-full overflow-hidden leading-[2.1] tracking-tight text-ink',
+            WIDTH_CLASS[appearance.textWidth],
+          ].join(' ')}
+          data-testid="typing-text"
           ref={containerRef}
           style={{ height: '100%', overflow: 'hidden' }}
         >
@@ -302,7 +320,7 @@ function Caret({ caret }: { caret: CaretSettings }) {
       aria-hidden="true"
       className={[
         'relative -mb-[0.1em] ml-[1px] inline-block h-[1.05em] translate-y-[0.12em]',
-        caret.style === 'line' ? 'w-[2px]' : 'w-[0.6ch]',
+        caret.style === 'line' ? 'w-[2px]' : 'w-0',
       ].join(' ')}
       data-style={caret.style}
       data-testid="typing-caret"
@@ -311,8 +329,8 @@ function Caret({ caret }: { caret: CaretSettings }) {
         className={[
           'absolute bg-accent',
           caret.style === 'line' ? 'inset-y-0 left-0 w-[2px]' : '',
-          caret.style === 'block' ? 'inset-0 rounded-[2px] opacity-60' : '',
-          caret.style === 'underline' ? 'bottom-0 left-0 h-[0.12em] w-full' : '',
+          caret.style === 'block' ? 'left-0 top-0 h-full w-[0.62em] rounded-[2px] opacity-60' : '',
+          caret.style === 'underline' ? 'bottom-0 left-0 h-[0.12em] w-[0.62em]' : '',
           caret.blink ? 'typing-caret' : '',
         ].join(' ')}
       />

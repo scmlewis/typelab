@@ -170,6 +170,19 @@ describe('typing sounds', () => {
     }).not.toThrow();
   });
 
+  it('swallows scheduling failures so typing cannot be blocked', () => {
+    const audio = createFakeAudio();
+    const sounds = new TypingSounds({ enabled: true, volume: 0.5 }, audio.factory);
+
+    vi.spyOn(audio.context, 'createOscillator').mockImplementation(() => {
+      throw new Error('audio device lost');
+    });
+
+    expect(() => {
+      sounds.play('correct');
+    }).not.toThrow();
+  });
+
   it('closes the context when disposed and can start again afterwards', async () => {
     const audio = createFakeAudio();
     const sounds = new TypingSounds({ enabled: true, volume: 0.5 }, audio.factory);

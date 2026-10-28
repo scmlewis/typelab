@@ -8,11 +8,8 @@ import type { Appearance } from '@/features/settings/settings';
 import { TypingSurface } from '@/features/typing/TypingSurface';
 import { TypingStore } from '@/features/typing/typingStore';
 
-function createStore() {
-  return new TypingStore({
-    config: DEFAULT_WORDS_CONFIG,
-    prompt: generatePrompt(DEFAULT_WORDS_CONFIG),
-  });
+function createStore(config = DEFAULT_WORDS_CONFIG) {
+  return new TypingStore({ config, prompt: generatePrompt(config) });
 }
 
 function appearance(overrides: Partial<Appearance> = {}): Appearance {
@@ -39,6 +36,7 @@ describe('typing surface appearance', () => {
     expect(surface).toHaveAttribute('data-font-size', 'medium');
     expect(surface).toHaveAttribute('data-text-width', 'default');
     expect(surface).toHaveClass('font-mono');
+    expect(screen.getByTestId('typing-text')).toHaveClass('max-w-3xl', 'mx-auto');
   });
 
   it('applies the chosen font, size, and text width', () => {
@@ -56,7 +54,7 @@ describe('typing surface appearance', () => {
     expect(surface).toHaveAttribute('data-text-width', 'wide');
     expect(surface).toHaveClass('font-serif');
     expect(surface).toHaveClass('text-3xl', 'sm:text-4xl');
-    expect(surface).toHaveClass('max-w-none');
+    expect(screen.getByTestId('typing-text')).toHaveClass('max-w-none');
   });
 
   it('renders a still caret when blinking is disabled', () => {
@@ -130,5 +128,67 @@ describe('typing surface sounds', () => {
     fireEvent.input(textarea, { target: { value: ' ' } });
 
     expect(play).toHaveBeenLastCalledWith('correct');
+  });
+
+  it('cancels the run when escape reaches the surface', () => {
+    const store = createStore();
+    const prompt = store.getState().snapshot.prompt;
+    const firstWord = prompt.words[0] ?? '';
+
+    render(<TypingSurface soundPlayer={{ play: vi.fn() }} store={store} />);
+
+    const textarea = screen.getByLabelText('Typing input');
+
+    fireEvent.input(textarea, { target: { value: firstWord.charAt(0) } });
+    fireEvent.keyDown(textarea, { key: 'Escape' });
+
+    expect(store.getState().snapshot.status).toBe('cancelled');
+  });
+
+  it('plays an error cue when a strict run rejects an extra space', () => {
+    const config = { ...DEFAULT_WORDS_CONFIG, errorPolicy: 'strict' as const };
+    const store = createStore(config);
+    const prompt = store.getState().snapshot.prompt;
+    const firstWord = prompt.words[0] ?? '';
+    const play = vi.fn();
+
+    render(<TypingSurface soundPlayer={{ play }} store={store} />);
+
+    const textarea = screen.getByLabelText('Typing input');
+
+    fireEvent.input(textarea, { target: { value: firstWord.charAt(0) } });
+    fireEvent.input(textarea, { target: { value: ' ' } });
+    fireEvent.input(textarea, { target: { value: ' ' } });
+
+    expect(store.getState().snapshot.status).toBe('failed');
+    expect(play).toHaveBeenLastCalledWith('incorrect');
+  });
+
+  it('does not play a backspace cue when corrections are blocked', () => {
+    const config = { ...DEFAULT_WORDS_CONFIG, errorPolicy: 'no-backspace' as const };
+    const store = createStore(config);
+    const prompt = store.getState().snapshot.prompt;
+    const firstWord = prompt.words[0] ?? '';
+    const play = vi.fn();
+
+    render(<TypingSurface soundPlayer={{ play }} store={store} />);
+
+    const textarea = screen.getByLabelText('Typing input');
+
+    fireEvent.input(textarea, { target: { value: firstWord.charAt(0) } });
+    fireEvent.keyDown(textarea, { key: 'Backspace' });
+
+    expect(play).not.toHaveBeenCalledWith('backspace');
+  });
+
+  it('stays silent for input the engine ignores', () => {
+    const store = createStore();
+    const play = vi.fn();
+
+    render(<TypingSurface soundPlayer={{ play }} store={store} />);
+
+    fireEvent.input(screen.getByLabelText('Typing input'), { target: { value: ' ' } });
+
+    expect(play).not.toHaveBeenCalled();
   });
 });

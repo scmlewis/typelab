@@ -61,6 +61,24 @@ describe('local settings repository', () => {
     expect(localStorage.getItem(`typelab.settings.corrupt.${NOW.getTime()}`)).toBeNull();
   });
 
+  it('migrates a version 2 envelope and keeps its theme', async () => {
+    const repository = createRepository();
+    const legacy = {
+      testDefaults: DEFAULT_SETTINGS.testDefaults,
+      appearance: { theme: 'dark' },
+    };
+    localStorage.setItem(SETTINGS_STORAGE_KEY, storedEnvelope(legacy, 2));
+
+    await expect(repository.load()).resolves.toEqual({
+      settings: {
+        ...DEFAULT_SETTINGS,
+        appearance: { ...DEFAULT_SETTINGS.appearance, theme: 'dark' },
+      },
+      notice: null,
+    });
+    expect(localStorage.getItem(`typelab.settings.corrupt.${NOW.getTime()}`)).toBeNull();
+  });
+
   it('backs up invalid JSON, resets to defaults, and reports corruption', async () => {
     const repository = createRepository();
     localStorage.setItem(SETTINGS_STORAGE_KEY, '{not json');

@@ -261,6 +261,23 @@ describe('settings provider', () => {
     });
   });
 
+  it('reports appearance save failures without naming only the theme', async () => {
+    const user = userEvent.setup();
+    const { repository } = createRepository({ saveError: new Error('quota') });
+
+    renderProvider(repository);
+    await waitFor(() => {
+      expect(screen.getByText('ready')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Dark theme' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('error')).toHaveTextContent(/could not save appearance settings/i);
+    });
+    expect(screen.getByTestId('theme')).toHaveTextContent('dark');
+  });
+
   it('replaces the full settings document', async () => {
     const user = userEvent.setup();
     const { repository, save } = createRepository();

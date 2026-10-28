@@ -88,10 +88,18 @@ export class TypingSounds implements SoundPlayer {
       return;
     }
 
-    if (context.state === 'suspended') {
-      void context.resume().catch(() => {});
-    }
+    try {
+      if (context.state === 'suspended') {
+        void context.resume().catch(() => {});
+      }
 
+      this.schedule(context, kind);
+    } catch {
+      // Audio is decoration; a closed device must never block typing.
+    }
+  }
+
+  private schedule(context: AudioContextLike, kind: TypingSoundKind): void {
     const tone = TONES[kind];
     const start = context.currentTime;
     const end = start + tone.durationSeconds;
