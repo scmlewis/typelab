@@ -11,15 +11,23 @@ export function downloadText(
   contents: string,
   type = 'application/json;charset=utf-8',
 ): void {
-  const blob = new Blob([contents], { type });
+  downloadBlob(filename, new Blob([contents], { type }));
+}
+
+export function downloadBlob(filename: string, blob: Blob): void {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
 
   anchor.href = url;
   anchor.download = filename;
   anchor.rel = 'noopener';
+  document.body.append(anchor);
   anchor.click();
-  URL.revokeObjectURL(url);
+  anchor.remove();
+  // Some engines still read the URL after click(); revoke on the next task.
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 0);
 }
 
 function isoDate(date: Date): string {

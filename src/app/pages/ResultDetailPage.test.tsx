@@ -74,6 +74,7 @@ describe('result detail page', () => {
     expect(screen.getByText('180')).toBeInTheDocument();
     expect(screen.getByText('Personal best for this category.')).toBeInTheDocument();
     expect(screen.getByText(/too short for a speed chart/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /take this run with you/i })).toBeInTheDocument();
   });
 
   it('shows the source of a quote run', async () => {
@@ -94,8 +95,8 @@ describe('result detail page', () => {
 
     renderPage(repository);
 
-    expect(await screen.findByText(quote.source)).toBeInTheDocument();
-    expect(screen.getByText(new RegExp(quote.author))).toBeInTheDocument();
+    expect(await screen.findByTestId('quote-source')).toHaveTextContent(quote.source);
+    expect(screen.getByTestId('quote-source')).toHaveTextContent(quote.author);
   });
 
   it('draws the speed chart for a run with samples', async () => {
@@ -151,7 +152,9 @@ describe('result detail page', () => {
 
     renderPage(repository);
 
-    expect(await screen.findByText(/excluded from personal bests/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/kept in history but excluded from personal bests/i),
+    ).toBeInTheDocument();
     expect(repository.getPersonalBest).not.toHaveBeenCalled();
   });
 

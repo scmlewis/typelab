@@ -2,6 +2,7 @@ import { ArrowRight, Repeat2 } from 'lucide-react';
 
 import { getQuoteById } from '@/engine/content/quotes';
 import type { EngineStatus, TestResult } from '@/engine/types';
+import { SharePanel } from '@/features/share/SharePanel';
 import {
   describeResultMode,
   formatDuration,
@@ -117,6 +118,8 @@ export function ResultPanel({ result, status, onNext, onRepeat }: ResultPanelPro
           <kbd className="font-mono text-ink">Enter</kbd>
         </span>
       </div>
+
+      {result ? <SharePanel result={result} /> : null}
     </section>
   );
 }

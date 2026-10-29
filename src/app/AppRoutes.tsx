@@ -14,6 +14,9 @@ const ResultDetailPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import('@/app/pages/SettingsPage').then((module) => ({ default: module.SettingsPage })),
 );
+const SharedResultPage = lazy(() =>
+  import('@/app/pages/SharedResultPage').then((module) => ({ default: module.SharedResultPage })),
+);
 
 export function AppRoutes() {
   return (
@@ -22,6 +25,7 @@ export function AppRoutes() {
         <Route index element={<HomePage />} />
         <Route path="history" element={<HistoryPage />} />
         <Route path="results/:id" element={<ResultDetailPage />} />
+        <Route path="shared" element={<SharedResultPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

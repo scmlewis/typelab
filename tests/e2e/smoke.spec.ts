@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 async function runTenWords(page: Page, options: { delay?: number } = {}) {
   await page.goto('/');
@@ -41,6 +42,52 @@ test('a ten-word run completes and shows a result', async ({ page }) => {
   const result = page.getByTestId('result-panel');
   await expect(result.getByRole('heading', { name: /run complete/i })).toBeVisible();
   await expect(page.getByTestId('result-net-wpm')).toHaveText(/\d+/);
+});
+
+test('a shared link opens the same run in a fresh browser', async ({ page, browser }) => {
+  await runTenWords(page);
+
+  const link = await page.getByLabel('Share link').inputValue();
+  const summary = await page.locator('[data-testid="share-panel"] pre').textContent();
+  const netWpm = summary?.match(/([\d.]+) net WPM/)?.[1];
+
+  expect(link).toMatch(/\/shared\?r=[A-Za-z0-9_-]+$/);
+  expect(netWpm).toBeTruthy();
+
+  const freshContext = await browser.newContext();
+  const freshPage = await freshContext.newPage();
+
+  await freshPage.goto(link);
+
+  await expect(freshPage.getByRole('heading', { name: /a result from the bench/i })).toBeVisible();
+  await expect(freshPage.getByTestId('shared-net-wpm')).toHaveText(netWpm ?? '');
+  await expect(freshPage.getByText(/^10 words · english · /i)).toBeVisible();
+  await expect(freshPage.getByText(/not checked by a server/i)).toBeVisible();
+
+  await freshContext.close();
+});
+
+test('a run downloads as a PNG share card', async ({ page }) => {
+  await runTenWords(page);
+
+  const downloadPromise = page.waitForEvent('download');
+
+  await page.getByRole('button', { name: /download image card/i }).click();
+
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename()).toMatch(/^typelab-result-\d{4}-\d{2}-\d{2}\.png$/);
+
+  const path = await download.path();
+
+  expect(path).toBeTruthy();
+
+  const png = await readFile(path);
+
+  expect(png.subarray(1, 4).toString('ascii')).toBe('PNG');
+  expect(png.readUInt32BE(16)).toBe(1_200);
+  expect(png.readUInt32BE(20)).toBe(630);
+  await expect(page.getByText(/image card downloaded/i)).toBeVisible();
 });
 
 test('the typing surface stays above the fold on a phone viewport', async ({ page }) => {
@@ -176,7 +223,7 @@ test('a custom text run completes and reports itself', async ({ page }) => {
 
   await expect(page.getByTestId('result-panel')).toBeVisible();
   await expect(page.getByTestId('save-status')).toHaveAttribute('data-save-status', 'saved');
-  await expect(page.getByText(/custom text · english/i)).toBeVisible();
+  await expect(page.getByText(/^custom text · english · /i)).toBeVisible();
 });
 
 test('a completed run survives a reload in local history', async ({ page }) => {
@@ -226,7 +273,7 @@ test('a history row opens the run detail with metrics and a personal best', asyn
 
   await expect(page).toHaveURL(/\/results\/[^/]+$/);
   await expect(page.getByRole('heading', { name: /run detail/i })).toBeVisible();
-  await expect(page.getByText('Net WPM')).toBeVisible();
+  await expect(page.getByText('Net WPM', { exact: true })).toBeVisible();
   await expect(page.getByText('Raw WPM', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: /speed over time/i })).toBeVisible();
   await expect(page.getByText(/averaged .* peak second/i)).toBeVisible();

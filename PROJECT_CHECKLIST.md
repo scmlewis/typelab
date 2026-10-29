@@ -103,6 +103,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] E2E: result detail + personal best
 - [x] E2E: theme choice persists across a reload
 - [x] E2E: typography, caret, and sound settings persist across a reload
+- [x] E2E: share link round trip and PNG card download
 - [ ] E2E: responsive layout + keyboard navigation
 - [ ] Accessibility smoke (axe)
 - [ ] Reduced-motion check
@@ -135,8 +136,8 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Invalid/oversized import handling
 - [x] CSV export
 - [ ] Storage usage display and retention controls
-- [ ] Share text summary + image card
-- [ ] Optional encoded URL share with size cap
+- [x] Share text summary + image card
+- [x] Optional encoded URL share with size cap
 - [ ] Mode regression matrix
 - [ ] Contrast audit
 - [ ] Phase 2 exit report

@@ -7,6 +7,7 @@ import { isDegenerateResult } from '@/engine/scoring';
 import type { TestResult } from '@/engine/types';
 import { getResultRepository } from '@/features/history/resultRepository';
 import { SpeedChart } from '@/features/history/SpeedChart';
+import { SharePanel } from '@/features/share/SharePanel';
 import {
   describeResultMode,
   describeTestConfig,
@@ -188,6 +189,8 @@ export function ResultDetailPage({ repository }: ResultDetailPageProps) {
       </dl>
 
       <SpeedChart samples={result.samples} />
+
+      <SharePanel headingLevel={2} result={result} />
 
       <div className="mt-8 grid gap-8 border-t border-line pt-6 sm:grid-cols-2">
         <div>
