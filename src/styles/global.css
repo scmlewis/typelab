@@ -41,14 +41,23 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    :root:not([data-motion='full']) *,
+    :root:not([data-motion='full']) *::before,
+    :root:not([data-motion='full']) *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       scroll-behavior: auto !important;
       transition-duration: 0.01ms !important;
     }
+  }
+
+  [data-motion='reduce'] *,
+  [data-motion='reduce'] *::before,
+  [data-motion='reduce'] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
@@ -73,7 +82,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .typing-caret {
+  :root:not([data-motion='full']) .typing-caret {
     animation: none;
   }
+}
+
+[data-motion='reduce'] .typing-caret {
+  animation: none;
 }

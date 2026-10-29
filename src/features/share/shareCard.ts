@@ -9,7 +9,7 @@ const PAPER = '#f4efe4';
 const INK = '#1e231f';
 const MUTED = '#67675f';
 const LINE = '#d7cebd';
-const ACCENT = '#b84f2a';
+const ACCENT = '#a8451f';
 
 const MONO = "ui-monospace, 'SFMono-Regular', 'Cascadia Code', Menlo, Consolas, monospace";
 const EDITORIAL = "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif";

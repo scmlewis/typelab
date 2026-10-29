@@ -149,13 +149,16 @@ test('a dark theme persists and reaches the bench', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 });
 
-test('typography, caret, and sound settings persist and reach the bench', async ({ page }) => {
+test('typography, caret, motion, and sound settings persist and reach the bench', async ({
+  page,
+}) => {
   await page.goto('/settings');
 
   await page.getByRole('button', { name: 'Serif', exact: true }).click();
   await page.getByRole('button', { name: 'Large', exact: true }).click();
   await page.getByRole('button', { name: 'Wide', exact: true }).click();
   await page.getByRole('button', { name: 'Block', exact: true }).click();
+  await page.getByRole('button', { name: 'Reduced', exact: true }).click();
   await page.getByLabel('Blink caret').uncheck();
   await page.getByLabel('Key sounds').check();
   await page.getByLabel('Key sound volume').focus();
@@ -163,6 +166,7 @@ test('typography, caret, and sound settings persist and reach the bench', async 
 
   await page.reload();
 
+  await expect(page.locator('html')).toHaveAttribute('data-motion', 'reduce');
   await expect(page.getByRole('button', { name: 'Serif', exact: true })).toHaveAttribute(
     'aria-pressed',
     'true',
@@ -182,6 +186,7 @@ test('typography, caret, and sound settings persist and reach the bench', async 
   await expect(surface).toHaveAttribute('data-text-width', 'wide');
   await expect(surface).toHaveAttribute('data-caret-style', 'block');
   await expect(surface).toHaveAttribute('data-caret-blink', 'false');
+  await expect(page.getByTestId('typing-caret')).toHaveCSS('animation-name', 'none');
 });
 
 test('a quote run completes and keeps its source', async ({ page }) => {

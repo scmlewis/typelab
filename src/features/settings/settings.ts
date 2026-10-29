@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { DEFAULT_TIMED_CONFIG, DEFAULT_WORDS_CONFIG } from '@/engine/config';
 import type { TestConfig } from '@/engine/types';
 
-export const SETTINGS_SCHEMA_VERSION = 3;
+export const SETTINGS_SCHEMA_VERSION = 4;
 export const SETTINGS_STORAGE_KEY = 'typelab.settings';
 export const SETTINGS_BACKUP_PREFIX = 'typelab.settings.corrupt.';
 
@@ -22,6 +22,7 @@ export const testDefaultsSchema = z.object({
 });
 
 export const themePreferenceSchema = z.enum(['light', 'dark', 'system']);
+export const motionPreferenceSchema = z.enum(['system', 'reduce', 'full']);
 export const typingFontFamilySchema = z.enum(['mono', 'sans', 'serif']);
 export const typingFontSizeSchema = z.enum(['small', 'medium', 'large']);
 export const typingTextWidthSchema = z.enum(['narrow', 'default', 'wide']);
@@ -41,6 +42,8 @@ export const soundSettingsSchema = z.object({
 export const appearanceSchema = z.object({
   /** `system` follows the operating-system colour scheme. */
   theme: themePreferenceSchema.default('system'),
+  /** `system` follows the operating-system reduced-motion setting. */
+  motion: motionPreferenceSchema.default('system'),
   fontFamily: typingFontFamilySchema.default('mono'),
   fontSize: typingFontSizeSchema.default('medium'),
   textWidth: typingTextWidthSchema.default('default'),
@@ -55,6 +58,7 @@ export const settingsSchema = z.object({
 
 export type TestDefaults = z.infer<typeof testDefaultsSchema>;
 export type ThemePreference = z.infer<typeof themePreferenceSchema>;
+export type MotionPreference = z.infer<typeof motionPreferenceSchema>;
 export type TypingFontFamily = z.infer<typeof typingFontFamilySchema>;
 export type TypingFontSize = z.infer<typeof typingFontSizeSchema>;
 export type TypingTextWidth = z.infer<typeof typingTextWidthSchema>;
@@ -77,6 +81,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   },
   appearance: {
     theme: 'system',
+    motion: 'system',
     fontFamily: 'mono',
     fontSize: 'medium',
     textWidth: 'default',
@@ -92,6 +97,18 @@ const settingsV1Schema = z.object({
 const settingsV2Schema = z.object({
   testDefaults: testDefaultsSchema,
   appearance: z.object({ theme: themePreferenceSchema }),
+});
+
+const settingsV3Schema = z.object({
+  testDefaults: testDefaultsSchema,
+  appearance: z.object({
+    theme: themePreferenceSchema,
+    fontFamily: typingFontFamilySchema,
+    fontSize: typingFontSizeSchema,
+    textWidth: typingTextWidthSchema,
+    caret: caretSettingsSchema,
+    sounds: soundSettingsSchema,
+  }),
 });
 
 /**
@@ -112,6 +129,17 @@ export function migrateSettings(version: number, value: unknown): AppSettings | 
       ? {
           testDefaults: legacy.data.testDefaults,
           appearance: appearanceSchema.parse({ theme: legacy.data.appearance.theme }),
+        }
+      : null;
+  }
+
+  if (version === 3) {
+    const legacy = settingsV3Schema.safeParse(value);
+
+    return legacy.success
+      ? {
+          testDefaults: legacy.data.testDefaults,
+          appearance: { ...legacy.data.appearance, motion: 'system' },
         }
       : null;
   }

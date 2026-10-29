@@ -83,7 +83,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Missing-result state
 - [x] Refresh recovery
 - [x] Settings repository + localStorage
-- [x] Settings schema versioning/migration (v1 → v2 appearance, v2 → v3 typography/caret/sounds)
+- [x] Settings schema versioning/migration (v1 → v2 appearance, v2 → v3 typography/caret/sounds, v3 → v4 motion)
 - [x] Result repository + Dexie
 - [x] History query for personal bests
 - [x] History page with mode filter and excluded-run toggle
@@ -105,8 +105,8 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] E2E: typography, caret, and sound settings persist across a reload
 - [x] E2E: share link round trip and PNG card download
 - [ ] E2E: responsive layout + keyboard navigation
-- [ ] Accessibility smoke (axe)
-- [ ] Reduced-motion check
+- [x] Accessibility smoke (axe) across bench, settings, history, result, and shared pages
+- [x] Reduced-motion check: system preference, saved override, caret blink suppression
 - [ ] Bundle visualizer + budget check
 - [ ] Engine benchmark + interaction p95
 - [ ] Manual Chrome, Firefox, Safari check
@@ -124,7 +124,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Typography, text width, caret style/blink, and opt-in key sounds
 - [ ] Custom colour palette
 - [ ] Live stats visibility, error highlighting, quick restart
-- [ ] Reduced-motion preference
+- [x] Reduced-motion preference (System / Reduced / Full)
 - [x] Settings import/export + reset
 - [x] Speed chart from interval samples
 - [x] Detailed result analysis
@@ -139,7 +139,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Share text summary + image card
 - [x] Optional encoded URL share with size cap
 - [ ] Mode regression matrix
-- [ ] Contrast audit
+- [x] Contrast audit (axe WCAG A/AA; accent darkened to #a8451f)
 - [ ] Phase 2 exit report
 
 ## Deferred — cloud and social scope
@@ -175,3 +175,4 @@ Only after Phase 2 is stable.
 | Package manager | npm | Decided |
 | Share format | Text + image first; encoded URL optional | Decided |
 | PWA | Defer; no service worker in Phase 1 | Decided |
+

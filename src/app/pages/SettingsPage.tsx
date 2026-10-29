@@ -9,6 +9,7 @@ import { DEFAULT_SETTINGS } from '@/features/settings/settings';
 import type {
   Appearance,
   CaretStyle,
+  MotionPreference,
   TestDefaults,
   ThemePreference,
   TypingFontFamily,
@@ -31,6 +32,12 @@ const THEMES: readonly { value: ThemePreference; label: string }[] = [
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
   { value: 'system', label: 'System' },
+];
+
+const MOTIONS: readonly { value: MotionPreference; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'reduce', label: 'Reduced' },
+  { value: 'full', label: 'Full' },
 ];
 
 const FONTS: readonly { value: TypingFontFamily; label: string }[] = [
@@ -130,6 +137,25 @@ export function SettingsPage() {
           </div>
           <p className="max-w-xs text-xs leading-5 text-ink-muted">
             System follows your device&apos;s light or dark setting.
+          </p>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-4">
+          <Group label="Motion">
+            {MOTIONS.map((motion) => (
+              <Choice
+                active={appearance.motion === motion.value}
+                key={motion.value}
+                label={motion.label}
+                onClick={() => {
+                  saveAppearance({ motion: motion.value });
+                }}
+              />
+            ))}
+          </Group>
+          <p className="max-w-xs text-xs leading-5 text-ink-muted">
+            System follows your device&apos;s reduced-motion setting. Reduced quiets transitions and
+            stops the caret blinking.
           </p>
         </div>
       </fieldset>

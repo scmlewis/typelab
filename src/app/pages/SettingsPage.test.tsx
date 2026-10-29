@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
@@ -64,10 +64,11 @@ describe('settings page', () => {
 
     renderPage(repository);
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'System' })).toHaveAttribute(
-        'aria-pressed',
-        'true',
-      );
+      expect(
+        within(screen.getByRole('group', { name: 'Theme' })).getByRole('button', {
+          name: 'System',
+        }),
+      ).toHaveAttribute('aria-pressed', 'true');
     });
 
     await user.click(screen.getByRole('button', { name: 'Dark' }));
@@ -77,6 +78,24 @@ describe('settings page', () => {
       appearance: { ...DEFAULT_SETTINGS.appearance, theme: 'dark' },
     });
     expect(screen.getByRole('button', { name: 'Dark' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('saves a reduced-motion choice immediately', async () => {
+    const user = userEvent.setup();
+    const { repository, save } = createRepository();
+
+    renderPage(repository);
+
+    await user.click(
+      within(screen.getByRole('group', { name: 'Motion' })).getByRole('button', {
+        name: 'Reduced',
+      }),
+    );
+
+    expect(save).toHaveBeenCalledWith({
+      ...DEFAULT_SETTINGS,
+      appearance: { ...DEFAULT_SETTINGS.appearance, motion: 'reduce' },
+    });
   });
 
   it('shows saved typography, caret, and sound preferences', async () => {

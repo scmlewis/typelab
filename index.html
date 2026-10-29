@@ -19,6 +19,11 @@
             theme === 'dark' ||
             (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
           document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+          const motion = stored?.settings?.appearance?.motion ?? 'system';
+          const reduced =
+            motion === 'reduce' ||
+            (motion === 'system' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+          document.documentElement.dataset.motion = reduced ? 'reduce' : 'full';
           document
             .querySelector('meta[name="theme-color"]')
             ?.setAttribute('content', dark ? '#141816' : '#f4efe4');

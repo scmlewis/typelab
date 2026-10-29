@@ -29,6 +29,7 @@ describe('settings schema', () => {
 
     expect(parsed.appearance).toEqual({
       theme: 'dark',
+      motion: 'system',
       fontFamily: 'mono',
       fontSize: 'medium',
       textWidth: 'default',
@@ -52,6 +53,13 @@ describe('settings schema', () => {
           ...DEFAULT_SETTINGS.appearance,
           caret: { style: 'beam', blink: true },
         },
+      }).success,
+    ).toBe(false);
+
+    expect(
+      settingsSchema.safeParse({
+        ...DEFAULT_SETTINGS,
+        appearance: { ...DEFAULT_SETTINGS.appearance, motion: 'sometimes' },
       }).success,
     ).toBe(false);
   });
@@ -100,7 +108,7 @@ describe('settings migration', () => {
     const legacy = { testDefaults: DEFAULT_SETTINGS.testDefaults };
 
     expect(migrateSettings(1, legacy)).toEqual(DEFAULT_SETTINGS);
-    expect(SETTINGS_SCHEMA_VERSION).toBe(3);
+    expect(SETTINGS_SCHEMA_VERSION).toBe(4);
   });
 
   it('migrates version 2 by adding typography, caret, and sound defaults', () => {
@@ -127,6 +135,29 @@ describe('settings migration', () => {
         appearance: { theme: 'sepia' },
       }),
     ).toBeNull();
+  });
+
+  it('migrates version 3 by adding a system motion preference', () => {
+    const legacy = {
+      testDefaults: DEFAULT_SETTINGS.testDefaults,
+      appearance: {
+        theme: 'dark',
+        fontFamily: 'serif',
+        fontSize: 'large',
+        textWidth: 'wide',
+        caret: { style: 'block', blink: false },
+        sounds: { enabled: true, volume: 0.6 },
+      },
+    };
+
+    expect(migrateSettings(3, legacy)).toEqual({
+      testDefaults: DEFAULT_SETTINGS.testDefaults,
+      appearance: {
+        ...legacy.appearance,
+        theme: 'dark',
+        motion: 'system',
+      },
+    });
   });
 
   it('accepts current settings unchanged', () => {
