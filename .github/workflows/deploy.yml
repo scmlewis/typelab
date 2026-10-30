@@ -53,6 +53,30 @@ jobs:
             echo "::notice::Cloudflare credentials are not configured; skipping deployment."
           fi
 
+      - name: Ensure Pages project
+        if: steps.credentials.outputs.configured == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects"
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "$api/typelab")
+
+          if [ "$status" = "404" ]; then
+            echo "Creating Pages project typelab."
+            response=$(curl -sS -X POST \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data '{"name":"typelab","production_branch":"main"}' \
+              "$api")
+            echo "$response" | jq -e '.success == true' > /dev/null
+          elif [ "$status" != "200" ]; then
+            echo "Cloudflare API returned unexpected status $status."
+            exit 1
+          fi
+
       - name: Deploy
         if: steps.credentials.outputs.configured == 'true'
         uses: cloudflare/wrangler-action@v3
