@@ -44,8 +44,10 @@ E2E runs against `npm run build && npm run preview` on `127.0.0.1:4173`. Install
 
 ## Cloudflare Pages setup
 
-The deploy workflow (`.github/workflows/deploy.yml`) builds the app and deploys `dist/` with
-Wrangler on every push to `main`, and on manual dispatch. It does not run unless both secrets exist.
+The deploy workflow (`.github/workflows/deploy.yml`) runs after the CI workflow for `main`
+completes successfully, and on manual dispatch. It checks out the exact commit CI verified, builds
+the app, and deploys `dist/` with Wrangler. A failing CI run never reaches production. The deploy
+itself is skipped unless both secrets exist.
 
 1. Create a Pages project named **`typelab`** (Direct Upload, not Git integration; GitHub Actions
    owns the deploy).
