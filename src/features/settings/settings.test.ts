@@ -101,6 +101,35 @@ describe('settings schema', () => {
 
     expect(parsed).toEqual(DEFAULT_SETTINGS);
   });
+
+  it('adds an empty preset list to settings written before presets existed', () => {
+    const withoutPresets = {
+      testDefaults: DEFAULT_SETTINGS.testDefaults,
+      appearance: DEFAULT_SETTINGS.appearance,
+    };
+
+    expect(settingsSchema.parse(withoutPresets).presets).toEqual([]);
+  });
+
+  it('validates preset names and the preset limit', () => {
+    const preset = {
+      id: 'preset-1',
+      name: 'Warm-up',
+      defaults: DEFAULT_SETTINGS.testDefaults,
+    };
+
+    expect(settingsSchema.safeParse({ ...DEFAULT_SETTINGS, presets: [preset] }).success).toBe(true);
+    expect(
+      settingsSchema.safeParse({ ...DEFAULT_SETTINGS, presets: [{ ...preset, name: '   ' }] })
+        .success,
+    ).toBe(false);
+    expect(
+      settingsSchema.safeParse({
+        ...DEFAULT_SETTINGS,
+        presets: Array.from({ length: 13 }, (_, index) => ({ ...preset, id: `preset-${index}` })),
+      }).success,
+    ).toBe(false);
+  });
 });
 
 describe('settings migration', () => {
@@ -108,7 +137,7 @@ describe('settings migration', () => {
     const legacy = { testDefaults: DEFAULT_SETTINGS.testDefaults };
 
     expect(migrateSettings(1, legacy)).toEqual(DEFAULT_SETTINGS);
-    expect(SETTINGS_SCHEMA_VERSION).toBe(4);
+    expect(SETTINGS_SCHEMA_VERSION).toBe(5);
   });
 
   it('migrates version 2 by adding typography, caret, and sound defaults', () => {
@@ -157,7 +186,17 @@ describe('settings migration', () => {
         theme: 'dark',
         motion: 'system',
       },
+      presets: [],
     });
+  });
+
+  it('migrates version 4 by starting an empty preset list', () => {
+    const legacy = {
+      testDefaults: { ...DEFAULT_SETTINGS.testDefaults, mode: 'words', wordCount: 25 },
+      appearance: { ...DEFAULT_SETTINGS.appearance, theme: 'dark', motion: 'reduce' },
+    };
+
+    expect(migrateSettings(4, legacy)).toEqual({ ...legacy, presets: [] });
   });
 
   it('accepts current settings unchanged', () => {

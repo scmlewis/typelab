@@ -5,11 +5,17 @@ import { Link } from 'react-router';
 import { DURATION_OPTIONS, WORD_COUNT_OPTIONS } from '@/engine/config';
 import type { ErrorPolicy } from '@/engine/types';
 import { BackupPanel } from '@/features/history/BackupPanel';
-import { DEFAULT_SETTINGS } from '@/features/settings/settings';
+import {
+  DEFAULT_SETTINGS,
+  MAX_PRESETS,
+  PRESET_NAME_MAX_LENGTH,
+  configFromDefaults,
+} from '@/features/settings/settings';
 import type {
   Appearance,
   CaretStyle,
   MotionPreference,
+  Preset,
   TestDefaults,
   ThemePreference,
   TypingFontFamily,
@@ -17,6 +23,7 @@ import type {
   TypingTextWidth,
 } from '@/features/settings/settings';
 import { useSettings } from '@/features/settings/settingsContext';
+import { describeTestConfig } from '@/features/typing/format';
 
 const ERROR_POLICIES: readonly { value: ErrorPolicy; label: string; hint: string }[] = [
   { value: 'free', label: 'Free', hint: 'Keep typing through mistakes.' },
@@ -65,10 +72,14 @@ const CARET_STYLES: readonly { value: CaretStyle; label: string }[] = [
 ];
 
 export function SettingsPage() {
-  const { settings, status, updateTestDefaults, updateAppearance, resetSettings } = useSettings();
+  const { settings, status, updateTestDefaults, updateAppearance, updatePresets, resetSettings } =
+    useSettings();
   const [confirmingReset, setConfirmingReset] = useState(false);
+  const [presetName, setPresetName] = useState('');
+  const [presetStatus, setPresetStatus] = useState('');
   const defaults = settings.testDefaults;
   const appearance = settings.appearance;
+  const presets = settings.presets;
 
   const save = (next: Partial<TestDefaults>) => {
     void updateTestDefaults({ ...defaults, ...next });
@@ -76,6 +87,47 @@ export function SettingsPage() {
 
   const saveAppearance = (next: Partial<Appearance>) => {
     void updateAppearance(next);
+  };
+
+  const savePreset = () => {
+    const name = presetName.trim();
+
+    if (name.length === 0) {
+      setPresetStatus('Give the preset a name first.');
+      return;
+    }
+
+    const existing = presets.find(
+      (preset) => preset.name.toLocaleLowerCase() === name.toLocaleLowerCase(),
+    );
+
+    if (existing !== undefined) {
+      void updatePresets(
+        presets.map((preset) => (preset.id === existing.id ? { ...preset, name } : preset)),
+      );
+      setPresetName('');
+      setPresetStatus(`Updated “${name}” with the current setup.`);
+      return;
+    }
+
+    if (presets.length >= MAX_PRESETS) {
+      setPresetStatus(`You can keep ${MAX_PRESETS} presets. Delete one before adding another.`);
+      return;
+    }
+
+    void updatePresets([...presets, { id: createPresetId(), name, defaults }]);
+    setPresetName('');
+    setPresetStatus(`Saved “${name}”.`);
+  };
+
+  const applyPreset = (preset: Preset) => {
+    void updateTestDefaults(preset.defaults);
+    setPresetStatus(`“${preset.name}” is now the bench default.`);
+  };
+
+  const deletePreset = (preset: Preset) => {
+    void updatePresets(presets.filter((candidate) => candidate.id !== preset.id));
+    setPresetStatus(`Deleted “${preset.name}”.`);
   };
 
   const handleReset = () => {
@@ -467,6 +519,102 @@ export function SettingsPage() {
         </div>
       </fieldset>
 
+      <fieldset
+        className="mt-8 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
+        disabled={status === 'loading'}
+      >
+        <legend className="sr-only">Saved presets</legend>
+        <p
+          aria-hidden="true"
+          className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-ink-muted"
+        >
+          Presets
+        </p>
+        <p className="mt-2 max-w-lg text-xs leading-5 text-ink-muted">
+          Name the current test defaults and reuse them from the bench. Presets travel with your
+          settings backup.
+        </p>
+
+        <form
+          className="mt-4 flex flex-wrap items-end gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            savePreset();
+          }}
+        >
+          <div className="min-w-0 flex-1">
+            <label
+              className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted"
+              htmlFor="preset-name"
+            >
+              Preset name
+            </label>
+            <input
+              className="mt-2 w-full rounded-full border border-line bg-surface px-3.5 py-1.5 text-sm text-ink placeholder:text-ink-muted/70"
+              id="preset-name"
+              maxLength={PRESET_NAME_MAX_LENGTH}
+              onChange={(event) => {
+                setPresetName(event.target.value);
+              }}
+              placeholder="Morning warm-up"
+              value={presetName}
+            />
+          </div>
+          <button
+            className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={presetName.trim().length === 0}
+            type="submit"
+          >
+            Save current setup
+          </button>
+        </form>
+        <p className="mt-2 min-h-4 text-xs leading-5 text-ink-muted" role="status">
+          {presetStatus}
+        </p>
+
+        {presets.length === 0 ? (
+          <p className="mt-2 text-xs leading-5 text-ink-muted">
+            No presets yet. The bench keeps showing every preset you save.
+          </p>
+        ) : (
+          <ul className="mt-3 divide-y divide-line/70 border-t border-line/70">
+            {presets.map((preset) => (
+              <li
+                className="flex flex-wrap items-center justify-between gap-3 py-3"
+                key={preset.id}
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{preset.name}</p>
+                  <p className="mt-0.5 font-mono text-[0.7rem] leading-5 text-ink-muted">
+                    {describeTestConfig(configFromDefaults(preset.defaults, 1))}
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    className="rounded-full border border-line px-3 py-1.5 text-xs font-medium transition-colors hover:bg-surface-strong"
+                    onClick={() => {
+                      applyPreset(preset);
+                    }}
+                    type="button"
+                  >
+                    Use
+                  </button>
+                  <button
+                    className="rounded-full px-3 py-1.5 text-xs font-medium text-ink-muted underline underline-offset-4 transition-colors hover:text-ink"
+                    onClick={() => {
+                      deletePreset(preset);
+                    }}
+                    type="button"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </fieldset>
+
       <BackupPanel />
 
       <div className="mt-8 rounded-card border border-line bg-surface p-6">
@@ -493,6 +641,14 @@ export function SettingsPage() {
       </div>
     </section>
   );
+}
+
+function createPresetId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `preset-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 function Group({ children, label }: { children: ReactNode; label: string }) {

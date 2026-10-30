@@ -13,7 +13,11 @@ import { TestToolbar } from '@/features/typing/TestToolbar';
 import { TypingSurface } from '@/features/typing/TypingSurface';
 import { TypingStore } from '@/features/typing/typingStore';
 import { useTypingSelector } from '@/features/typing/useTypingSelector';
-import { toTestConfig, testDefaultsFromConfig } from '@/features/settings/settings';
+import {
+  toTestConfig,
+  testDefaultsFromConfig,
+  configFromDefaults,
+} from '@/features/settings/settings';
 import { useSettings } from '@/features/settings/settingsContext';
 
 interface TestSession {
@@ -220,6 +224,10 @@ export function TypingTest() {
           setCustomOpen(true);
         }}
         onRestart={nextTest}
+        presets={settings.presets}
+        onApplyPreset={(preset) => {
+          changeConfig(configFromDefaults(preset.defaults, session.config.seed));
+        }}
       />
 
       {customOpen ? (

@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { getQuoteById, pickQuote } from '@/engine/content/quotes';
 import { DEFAULT_TIMED_CONFIG } from '@/engine/config';
 import type { QuoteTestConfig } from '@/engine/types';
+import { DEFAULT_SETTINGS } from '@/features/settings/settings';
 import { TestToolbar } from '@/features/typing/TestToolbar';
 
 function quoteConfig(): QuoteTestConfig {
@@ -17,6 +18,51 @@ function quoteConfig(): QuoteTestConfig {
     customText: null,
   };
 }
+
+describe('test toolbar presets', () => {
+  const preset = {
+    id: 'preset-1',
+    name: 'Warm-up',
+    defaults: { ...DEFAULT_SETTINGS.testDefaults, durationSeconds: 15 as const },
+  };
+
+  it('offers saved presets and reports the chosen one', async () => {
+    const user = userEvent.setup();
+    const onApplyPreset = vi.fn();
+
+    render(
+      <TestToolbar
+        config={DEFAULT_TIMED_CONFIG}
+        disabled={false}
+        onChange={() => {}}
+        onCustomText={() => {}}
+        onRestart={() => {}}
+        onApplyPreset={onApplyPreset}
+        presets={[preset]}
+      />,
+    );
+
+    expect(screen.getByRole('group', { name: 'Saved presets' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Warm-up' }));
+
+    expect(onApplyPreset).toHaveBeenCalledWith(preset);
+  });
+
+  it('hides the preset row when there are none', () => {
+    render(
+      <TestToolbar
+        config={DEFAULT_TIMED_CONFIG}
+        disabled={false}
+        onChange={() => {}}
+        onCustomText={() => {}}
+        onRestart={() => {}}
+      />,
+    );
+
+    expect(screen.queryByRole('group', { name: 'Saved presets' })).not.toBeInTheDocument();
+  });
+});
 
 describe('test toolbar quote mode', () => {
   it('switches to a quote with a real quote id', async () => {

@@ -8,6 +8,7 @@ import {
   WORD_COUNT_OPTIONS,
 } from '@/engine/config';
 import type { DurationSeconds, QuoteTestConfig, TestConfig, WordCount } from '@/engine/types';
+import type { Preset } from '@/features/settings/settings';
 
 interface TestToolbarProps {
   config: TestConfig;
@@ -17,6 +18,8 @@ interface TestToolbarProps {
   onChange: (config: TestConfig) => void;
   onCustomText: () => void;
   onRestart: () => void;
+  presets?: readonly Preset[];
+  onApplyPreset?: (preset: Preset) => void;
 }
 
 export function TestToolbar({
@@ -26,6 +29,8 @@ export function TestToolbar({
   onChange,
   onCustomText,
   onRestart,
+  presets = [],
+  onApplyPreset,
 }: TestToolbarProps) {
   const shared = {
     language: config.language,
@@ -75,6 +80,31 @@ export function TestToolbar({
 
   return (
     <div className="mt-6 border-b border-line/80 pb-3 sm:mt-8 sm:flex sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-3 sm:pb-4">
+      {presets.length > 0 ? (
+        <div
+          aria-label="Saved presets"
+          className="mb-3 flex w-full flex-wrap items-center gap-2 border-b border-line/70 pb-3 sm:order-first"
+          role="group"
+        >
+          <span className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-ink-muted">
+            Presets
+          </span>
+          {presets.map((preset) => (
+            <button
+              className="rounded-full border border-line/80 px-2.5 py-1 font-mono text-xs text-ink-muted transition-colors hover:bg-surface-strong hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={disabled}
+              key={preset.id}
+              onClick={() => {
+                onApplyPreset?.(preset);
+              }}
+              type="button"
+            >
+              {preset.name}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-center gap-2 sm:contents">
         <div
           aria-label="Test mode"

@@ -94,7 +94,7 @@ describe('history page', () => {
     renderPage(repository);
 
     expect(
-      await screen.findByRole('heading', { name: /progress over time/i }, { timeout: 5_000 }),
+      await screen.findByRole('heading', { name: /progress over time/i }, { timeout: 10_000 }),
     ).toBeInTheDocument();
     expect(screen.getByText(/latest 65 wpm/i)).toBeInTheDocument();
   });

@@ -149,6 +149,38 @@ test('a dark theme persists and reaches the bench', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 });
 
+test('a saved preset reaches the bench and survives a reload', async ({ page }) => {
+  await page.goto('/settings');
+
+  await page.getByLabel('Preset name').fill('Warm-up');
+  await page.getByRole('button', { name: 'Save current setup' }).click();
+  await expect(page.getByText(/saved “warm-up”/i)).toBeVisible();
+
+  await page.getByRole('link', { name: 'Test', exact: true }).click();
+
+  const presetGroup = page.getByRole('group', { name: 'Saved presets' });
+
+  await expect(presetGroup.getByRole('button', { name: 'Warm-up' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Words', exact: true }).click();
+  await page.getByRole('button', { name: '100', exact: true }).click();
+
+  await presetGroup.getByRole('button', { name: 'Warm-up' }).click();
+
+  await expect(page.getByRole('button', { name: 'Time', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(page.getByRole('button', { name: '30', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+
+  await page.reload();
+
+  await expect(presetGroup.getByRole('button', { name: 'Warm-up' })).toBeVisible();
+});
+
 test('typography, caret, motion, and sound settings persist and reach the bench', async ({
   page,
 }) => {

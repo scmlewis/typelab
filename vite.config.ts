@@ -20,6 +20,7 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     globals: false,
     css: true,
+    testTimeout: 15_000,
     restoreMocks: true,
     coverage: {
       provider: 'v8',

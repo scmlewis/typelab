@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { DEFAULT_TIMED_CONFIG, DEFAULT_WORDS_CONFIG } from '@/engine/config';
 import type { TestConfig } from '@/engine/types';
 
-export const SETTINGS_SCHEMA_VERSION = 4;
+export const SETTINGS_SCHEMA_VERSION = 5;
 export const SETTINGS_STORAGE_KEY = 'typelab.settings';
 export const SETTINGS_BACKUP_PREFIX = 'typelab.settings.corrupt.';
 
@@ -51,12 +51,24 @@ export const appearanceSchema = z.object({
   sounds: soundSettingsSchema.default(() => soundSettingsSchema.parse({})),
 });
 
+export const MAX_PRESETS = 12;
+export const PRESET_NAME_MAX_LENGTH = 40;
+
+export const presetSchema = z.object({
+  id: z.string().min(1).max(64),
+  name: z.string().trim().min(1).max(PRESET_NAME_MAX_LENGTH),
+  defaults: testDefaultsSchema,
+});
+
 export const settingsSchema = z.object({
   testDefaults: testDefaultsSchema,
   appearance: appearanceSchema.default(() => appearanceSchema.parse({})),
+  /** Named bench setups. Kept in settings so backups carry them. */
+  presets: z.array(presetSchema).max(MAX_PRESETS).default([]),
 });
 
 export type TestDefaults = z.infer<typeof testDefaultsSchema>;
+export type Preset = z.infer<typeof presetSchema>;
 export type ThemePreference = z.infer<typeof themePreferenceSchema>;
 export type MotionPreference = z.infer<typeof motionPreferenceSchema>;
 export type TypingFontFamily = z.infer<typeof typingFontFamilySchema>;
@@ -88,6 +100,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     caret: { style: 'line', blink: true },
     sounds: { enabled: false, volume: 0.5 },
   },
+  presets: [],
 };
 
 const settingsV1Schema = z.object({
@@ -111,6 +124,11 @@ const settingsV3Schema = z.object({
   }),
 });
 
+const settingsV4Schema = z.object({
+  testDefaults: testDefaultsSchema,
+  appearance: appearanceSchema,
+});
+
 /**
  * Settings are migrated one version at a time. Unknown versions and invalid
  * payloads return null so the repository can back up and reset instead.
@@ -122,6 +140,18 @@ export function migrateSettings(version: number, value: unknown): AppSettings | 
     return current.success ? current.data : null;
   }
 
+  if (version === 4) {
+    const legacy = settingsV4Schema.safeParse(value);
+
+    return legacy.success
+      ? {
+          testDefaults: legacy.data.testDefaults,
+          appearance: legacy.data.appearance,
+          presets: [],
+        }
+      : null;
+  }
+
   if (version === 2) {
     const legacy = settingsV2Schema.safeParse(value);
 
@@ -129,6 +159,7 @@ export function migrateSettings(version: number, value: unknown): AppSettings | 
       ? {
           testDefaults: legacy.data.testDefaults,
           appearance: appearanceSchema.parse({ theme: legacy.data.appearance.theme }),
+          presets: [],
         }
       : null;
   }
@@ -140,6 +171,7 @@ export function migrateSettings(version: number, value: unknown): AppSettings | 
       ? {
           testDefaults: legacy.data.testDefaults,
           appearance: { ...legacy.data.appearance, motion: 'system' },
+          presets: [],
         }
       : null;
   }
@@ -151,6 +183,7 @@ export function migrateSettings(version: number, value: unknown): AppSettings | 
       ? {
           testDefaults: legacy.data.testDefaults,
           appearance: appearanceSchema.parse({}),
+          presets: [],
         }
       : null;
   }
@@ -159,8 +192,11 @@ export function migrateSettings(version: number, value: unknown): AppSettings | 
 }
 
 export function toTestConfig(settings: AppSettings, seed: number): TestConfig {
-  const defaults = settings.testDefaults;
+  return configFromDefaults(settings.testDefaults, seed);
+}
 
+/** Build a runnable config from a saved bench setup. */
+export function configFromDefaults(defaults: TestDefaults, seed: number): TestConfig {
   if (defaults.mode === 'timed') {
     return {
       ...DEFAULT_TIMED_CONFIG,

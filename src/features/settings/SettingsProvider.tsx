@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { DEFAULT_SETTINGS } from '@/features/settings/settings';
-import type { Appearance, AppSettings, TestDefaults } from '@/features/settings/settings';
+import type { Appearance, AppSettings, Preset, TestDefaults } from '@/features/settings/settings';
 import { SettingsContext } from '@/features/settings/settingsContext';
 import type { SettingsContextValue } from '@/features/settings/settingsContext';
 import { LocalSettingsRepository } from '@/features/settings/settingsRepository';
@@ -133,6 +133,26 @@ export function SettingsProvider({ children, repository }: SettingsProviderProps
     [activeRepository, enqueue],
   );
 
+  const updatePresets = useCallback(
+    async (presets: Preset[]) => {
+      const next: AppSettings = { ...settingsRef.current, presets };
+      settingsRef.current = next;
+      setState((previous) => ({ ...previous, settings: next, error: null }));
+
+      try {
+        await enqueue(() => activeRepository.save(next));
+      } catch {
+        if (mounted.current) {
+          setState((previous) => ({
+            ...previous,
+            error: 'Could not save presets. They apply for the current session.',
+          }));
+        }
+      }
+    },
+    [activeRepository, enqueue],
+  );
+
   const replaceSettings = useCallback(
     async (settings: AppSettings) => {
       settingsRef.current = settings;
@@ -180,11 +200,20 @@ export function SettingsProvider({ children, repository }: SettingsProviderProps
       error: state.error,
       updateTestDefaults,
       updateAppearance,
+      updatePresets,
       replaceSettings,
       resetSettings,
       dismissNotice,
     }),
-    [state, updateTestDefaults, updateAppearance, replaceSettings, resetSettings, dismissNotice],
+    [
+      state,
+      updateTestDefaults,
+      updateAppearance,
+      updatePresets,
+      replaceSettings,
+      resetSettings,
+      dismissNotice,
+    ],
   );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

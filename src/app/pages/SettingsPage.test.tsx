@@ -267,4 +267,89 @@ describe('settings page', () => {
     expect(reset).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'Reset to defaults' })).toBeInTheDocument();
   });
+
+  it('saves the current setup as a named preset', async () => {
+    const user = userEvent.setup();
+    const { repository, save } = createRepository();
+
+    renderPage(repository);
+    await waitFor(() => {
+      expect(screen.getByLabelText('Preset name')).toBeInTheDocument();
+    });
+
+    await user.type(screen.getByLabelText('Preset name'), 'Warm-up');
+    await user.click(screen.getByRole('button', { name: 'Save current setup' }));
+
+    expect(save).toHaveBeenLastCalledWith({
+      ...DEFAULT_SETTINGS,
+      presets: [expect.objectContaining({ name: 'Warm-up' })],
+    });
+    expect(screen.getByText(/saved “warm-up”/i)).toBeInTheDocument();
+    expect(screen.getByText('30 seconds · English 200')).toBeInTheDocument();
+    expect(screen.getByLabelText('Preset name')).toHaveValue('');
+  });
+
+  it('applies a preset to the bench defaults and deletes it', async () => {
+    const user = userEvent.setup();
+    const preset = {
+      id: 'preset-1',
+      name: 'Sprint',
+      defaults: { ...DEFAULT_SETTINGS.testDefaults, durationSeconds: 15 as const },
+    };
+    const { repository, save } = createRepository();
+
+    repository.load = vi.fn(() =>
+      Promise.resolve({ settings: { ...DEFAULT_SETTINGS, presets: [preset] }, notice: null }),
+    );
+
+    renderPage(repository);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Use' })).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Use' }));
+
+    expect(save).toHaveBeenLastCalledWith({
+      ...DEFAULT_SETTINGS,
+      testDefaults: preset.defaults,
+      presets: [preset],
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+
+    expect(save).toHaveBeenLastCalledWith({
+      ...DEFAULT_SETTINGS,
+      testDefaults: preset.defaults,
+      presets: [],
+    });
+    expect(screen.queryByRole('button', { name: 'Use' })).not.toBeInTheDocument();
+  });
+
+  it('updates a preset when the name already exists', async () => {
+    const user = userEvent.setup();
+    const preset = {
+      id: 'preset-1',
+      name: 'Sprint',
+      defaults: { ...DEFAULT_SETTINGS.testDefaults, durationSeconds: 15 as const },
+    };
+    const { repository, save } = createRepository();
+
+    repository.load = vi.fn(() =>
+      Promise.resolve({ settings: { ...DEFAULT_SETTINGS, presets: [preset] }, notice: null }),
+    );
+
+    renderPage(repository);
+    await waitFor(() => {
+      expect(screen.getByLabelText('Preset name')).toBeInTheDocument();
+    });
+
+    await user.type(screen.getByLabelText('Preset name'), 'sprint');
+    await user.click(screen.getByRole('button', { name: 'Save current setup' }));
+
+    expect(save).toHaveBeenLastCalledWith({
+      ...DEFAULT_SETTINGS,
+      presets: [{ ...preset, name: 'sprint' }],
+    });
+    expect(screen.getByText(/updated “sprint”/i)).toBeInTheDocument();
+  });
 });

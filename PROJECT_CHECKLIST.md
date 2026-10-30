@@ -83,7 +83,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Missing-result state
 - [x] Refresh recovery
 - [x] Settings repository + localStorage
-- [x] Settings schema versioning/migration (v1 → v2 appearance, v2 → v3 typography/caret/sounds, v3 → v4 motion)
+- [x] Settings schema versioning/migration (v1 → v2 appearance, v2 → v3 typography/caret/sounds, v3 → v4 motion, v4 → v5 presets)
 - [x] Result repository + Dexie
 - [x] History query for personal bests
 - [x] History page with mode filter and excluded-run toggle
@@ -119,7 +119,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Quote mode
 - [x] Custom text mode
 - [ ] Additional languages/language packs
-- [ ] Saved presets
+- [x] Saved presets (named bench setups, saved in settings and backup)
 - [x] Theme setting (light, dark, system) with pre-paint boot and migration
 - [x] Typography, text width, caret style/blink, and opt-in key sounds
 - [ ] Custom colour palette
@@ -175,4 +175,5 @@ Only after Phase 2 is stable.
 | Package manager | npm | Decided |
 | Share format | Text + image first; encoded URL optional | Decided |
 | PWA | Defer; no service worker in Phase 1 | Decided |
+
 
