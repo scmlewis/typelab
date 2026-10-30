@@ -17,6 +17,13 @@ export default tseslint.config(
     },
   },
   {
+    // The pre-paint boot script runs in the browser and ships as a static file.
+    files: ['public/**/*.js'],
+    languageOptions: {
+      globals: { ...globals.browser },
+    },
+  },
+  {
     files: ['**/*.{ts,tsx}'],
     extends: [js.configs.recommended, ...tseslint.configs.recommendedTypeChecked],
     languageOptions: {

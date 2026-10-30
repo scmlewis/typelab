@@ -9,29 +9,7 @@
       content="TypeLab is a quiet, local-first typing laboratory. Measure speed, accuracy, and consistency without an account."
     />
     <meta name="theme-color" content="#f4efe4" />
-    <script>
-      (() => {
-        try {
-          const raw = localStorage.getItem('typelab.settings');
-          const stored = raw ? JSON.parse(raw) : null;
-          const theme = stored?.settings?.appearance?.theme ?? 'system';
-          const dark =
-            theme === 'dark' ||
-            (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-          const motion = stored?.settings?.appearance?.motion ?? 'system';
-          const reduced =
-            motion === 'reduce' ||
-            (motion === 'system' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-          document.documentElement.dataset.motion = reduced ? 'reduce' : 'full';
-          document
-            .querySelector('meta[name="theme-color"]')
-            ?.setAttribute('content', dark ? '#141816' : '#f4efe4');
-        } catch {
-          // The app will recover unreadable settings after it loads.
-        }
-      })();
-    </script>
+    <script src="/boot.js"></script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>TypeLab</title>
   </head>

@@ -44,6 +44,62 @@ test('a ten-word run completes and shows a result', async ({ page }) => {
   await expect(page.getByTestId('result-net-wpm')).toHaveText(/\d+/);
 });
 
+test('a timed run reports live progress and restarts before completion', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Time', exact: true }).click();
+  await page.getByRole('button', { name: '15', exact: true }).click();
+
+  const words = await page.locator('[data-word-index]').allTextContents();
+
+  await page.getByLabel('Typing input').focus();
+  await page.keyboard.type(`${words.slice(0, 2).join(' ')} `, { delay: 40 });
+
+  const surface = page.getByTestId('typing-surface');
+
+  await expect(surface).toHaveAttribute('data-status', 'running');
+  await expect(page.locator('[data-state="correct"]').first()).toBeVisible();
+
+  await page.getByRole('button', { name: 'Restart test' }).click();
+
+  await expect(surface).toHaveAttribute('data-status', 'idle');
+  await expect(page.locator('[data-state="correct"]')).toHaveCount(0);
+});
+
+test('backspace clears a mistake before the word is committed', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Words', exact: true }).click();
+  await page.getByRole('button', { name: '10', exact: true }).click();
+
+  const first = (await page.locator('[data-word-index]').first().textContent()) ?? '';
+
+  const input = page.getByLabel('Typing input');
+  await input.focus();
+  await expect(input).toBeFocused();
+  await page.keyboard.type(`${first.charAt(0)}zzz`, { delay: 40 });
+
+  const incorrect = page.locator('[data-state="incorrect"]');
+  await expect(incorrect).toHaveCount(3);
+
+  for (let index = 0; index < 3; index += 1) {
+    await page.keyboard.press('Backspace');
+  }
+
+  await expect(incorrect).toHaveCount(0);
+});
+
+test('punctuation and number modifiers reach the generated prompt', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Words', exact: true }).click();
+  await page.getByRole('button', { name: '100', exact: true }).click();
+  await page.getByRole('button', { name: 'Punctuation', exact: true }).click();
+  await page.getByRole('button', { name: 'Numbers', exact: true }).click();
+
+  const text = await page.getByTestId('typing-text').textContent();
+
+  expect(text).toMatch(/^[A-Z]/);
+  expect(text).toMatch(/\d/);
+});
+
 test('a shared link opens the same run in a fresh browser', async ({ page, browser }) => {
   await runTenWords(page);
 

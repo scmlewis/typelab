@@ -74,9 +74,15 @@ The app is a static SPA intended for Cloudflare Pages:
 - Build command: `npm run build`
 - Output directory: `dist`
 - SPA fallback: `public/_redirects` rewrites all routes to `index.html`
-- Preview deployments: one per pull request/branch
+- Security and caching: `public/_headers` sets a strict same-origin CSP, denies framing, and
+  fingerprinted assets are cached immutably. `/boot.js` revalidates so the pre-paint theme never
+  goes stale.
+- Bundle budget: `npm run check:bundle` fails the build when gzipped entry JS exceeds 160 kB, all
+  JS 340 kB, or all CSS 16 kB.
 
 The deploy workflow expects a Cloudflare Pages project named `typelab` and these GitHub Actions secrets: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Until both are configured, the workflow builds successfully and skips deployment with a notice.
+
+See [docs/launch-readiness.md](docs/launch-readiness.md) for the full pre-deploy gate, Pages setup, post-deploy smoke checks, manual browser/device matrix, known limitations, and rollback.
 
 ## Data
 

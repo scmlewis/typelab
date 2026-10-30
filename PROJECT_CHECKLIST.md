@@ -94,10 +94,10 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 
 ### Quality and exit
 
-- [ ] E2E: timed test
+- [x] E2E: timed test (live progress + restart before completion)
 - [x] E2E: word-count test
-- [ ] E2E: backspace correction
-- [ ] E2E: restart before completion
+- [x] E2E: backspace correction
+- [x] E2E: restart before completion
 - [ ] E2E: timer boundary
 - [x] E2E: refresh recovery
 - [x] E2E: result detail + personal best
@@ -107,12 +107,13 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [ ] E2E: responsive layout + keyboard navigation
 - [x] Accessibility smoke (axe) across bench, settings, history, result, and shared pages
 - [x] Reduced-motion check: system preference, saved override, caret blink suppression
-- [ ] Bundle visualizer + budget check
+- [x] Bundle budget check (gzip budgets enforced in CI; no separate visualizer)
 - [ ] Engine benchmark + interaction p95
 - [ ] Manual Chrome, Firefox, Safari check
 - [ ] Manual iOS/Android check
 - [ ] Docs: setup, scoring, input policy, local data/backup, limitations
 - [ ] Phase 1 exit report
+- [x] Launch readiness: CSP and headers, bundle budget, post-deploy checklist (`docs/launch-readiness.md`)
 
 ## Phase 2 — Advanced typing, analytics, and backup
 
@@ -175,5 +176,6 @@ Only after Phase 2 is stable.
 | Package manager | npm | Decided |
 | Share format | Text + image first; encoded URL optional | Decided |
 | PWA | Defer; no service worker in Phase 1 | Decided |
+
 
 
