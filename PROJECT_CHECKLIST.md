@@ -114,6 +114,7 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [ ] Docs: setup, scoring, input policy, local data/backup, limitations
 - [ ] Phase 1 exit report
 - [x] Launch readiness: CSP and headers, bundle budget, post-deploy checklist (`docs/launch-readiness.md`)
+- [x] Deployed to Cloudflare Pages at https://typelab-b1o.pages.dev (CI-gated, project auto-created)
 
 ## Phase 2 — Advanced typing, analytics, and backup
 

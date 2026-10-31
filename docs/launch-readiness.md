@@ -49,17 +49,23 @@ completes successfully, and on manual dispatch. It checks out the exact commit C
 the app, and deploys `dist/` with Wrangler. A failing CI run never reaches production. The deploy
 itself is skipped unless both secrets exist.
 
-1. Create a Pages project named **`typelab`** (Direct Upload, not Git integration; GitHub Actions
-   owns the deploy).
-2. Create a Cloudflare API token with the **Cloudflare Pages: Edit** permission for the target
+The workflow creates the Pages project named **`typelab`** if it is missing, then deploys with
+`--branch=main` so the release is a production deployment rather than a preview. The live site is
+**https://typelab-b1o.pages.dev** (Cloudflare assigned the unique `typelab-b1o` pages.dev
+subdomain; the project name remains `typelab`).
+
+1. Create a Cloudflare API token with the **Cloudflare Pages: Edit** permission for the target
    account.
-3. Add the repository secrets:
+2. Add the repository secrets:
    - `CLOUDFLARE_API_TOKEN`
    - `CLOUDFLARE_ACCOUNT_ID`
-4. Run the **Deploy to Cloudflare Pages** workflow. The build step runs first; the deploy step is
+3. Run the **Deploy to Cloudflare Pages** workflow. The build step runs first; the deploy step is
    skipped with an `::notice::` when either secret is missing.
-5. Optionally attach a custom domain in the Pages project settings. No app configuration changes
+4. Optionally attach a custom domain in the Pages project settings. No app configuration changes
    are required; the app only uses same-origin URLs.
+
+To create the project manually instead, use Direct Upload (not Git integration; GitHub Actions
+owns the deploy) and name it `typelab`.
 
 Build settings, when the project is configured in the dashboard instead:
 
