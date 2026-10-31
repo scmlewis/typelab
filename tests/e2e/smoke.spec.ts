@@ -443,3 +443,27 @@ test('the about page is reachable from the footer and survives a reload', async 
   await page.reload();
   await expect(page.getByRole('heading', { name: 'About the lab.' })).toBeVisible();
 });
+
+test('the field notes sit below the bench and link to about', async ({ page }) => {
+  await page.goto('/');
+
+  const band = page.getByRole('region', { name: /built for practice, not accounts/i });
+  const surface = page.getByTestId('typing-surface');
+
+  await expect(band).toBeVisible();
+  await expect(band.getByText('Local-first')).toBeVisible();
+  await expect(band.getByText('Measured properly')).toBeVisible();
+  await expect(band.getByText('Yours to tune')).toBeVisible();
+
+  const surfaceBox = await surface.boundingBox();
+  const bandBox = await band.boundingBox();
+
+  expect(surfaceBox).not.toBeNull();
+  expect(bandBox).not.toBeNull();
+  expect(bandBox!.y).toBeGreaterThan(surfaceBox!.y + surfaceBox!.height);
+
+  await band.getByRole('link', { name: /read the field notes/i }).click();
+
+  await expect(page).toHaveURL(/\/about$/);
+  await expect(page.getByRole('heading', { name: 'About the lab.' })).toBeVisible();
+});
