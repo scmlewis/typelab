@@ -81,8 +81,8 @@ const SECTIONS = [
           for the whole run.
         </li>
         <li>
-          Backspace removes the last typed character, stepping back into the previous word at a word
-          boundary. <kbd className="font-mono text-ink">Ctrl</kbd>/
+          Under Free, backspace removes the last typed character, stepping back into the previous
+          word at a word boundary. <kbd className="font-mono text-ink">Ctrl</kbd>/
           <kbd className="font-mono text-ink">Cmd</kbd> +{' '}
           <kbd className="font-mono text-ink">Enter</kbd> restarts the test.
         </li>

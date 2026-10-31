@@ -30,5 +30,8 @@ describe('about page', () => {
     expect(screen.getByText(/cloud sync/i)).toBeInTheDocument();
     expect(screen.getByText(/leaderboards/i)).toBeInTheDocument();
     expect(screen.getByText(/tracking/i)).toBeInTheDocument();
+
+    expect(screen.getByText(/under free, backspace removes/i)).toBeInTheDocument();
+    expect(screen.getByText(/corrections are disabled for the whole run/i)).toBeInTheDocument();
   });
 });
