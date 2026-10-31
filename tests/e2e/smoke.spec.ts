@@ -467,3 +467,21 @@ test('the field notes sit below the bench and link to about', async ({ page }) =
   await expect(page).toHaveURL(/\/about$/);
   await expect(page.getByRole('heading', { name: 'About the lab.' })).toBeVisible();
 });
+
+test('the site exposes a social card', async ({ page, request }) => {
+  await page.goto('/');
+
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    'content',
+    'https://typelab-b1o.pages.dev/og.png',
+  );
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    'content',
+    'summary_large_image',
+  );
+
+  const response = await request.get('/og.png');
+
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toContain('image/png');
+});
