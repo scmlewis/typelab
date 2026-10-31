@@ -429,3 +429,17 @@ test('an exported backup imports into a fresh browser', async ({ page, browser }
 
   await freshContext.close();
 });
+
+test('the about page is reachable from the footer and survives a reload', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.getByRole('navigation', { name: 'Primary' }).getByRole('link')).toHaveCount(3);
+
+  await page.getByRole('contentinfo').getByRole('link', { name: 'About' }).click();
+
+  await expect(page).toHaveURL(/\/about$/);
+  await expect(page.getByRole('heading', { name: 'About the lab.' })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'About the lab.' })).toBeVisible();
+});

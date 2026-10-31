@@ -87,7 +87,15 @@ export function AppLayout() {
       <footer className="border-t border-line/80">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-5 py-5 text-xs text-ink-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p>Local-only by design. No account. No tracking.</p>
-          <p className="font-mono uppercase tracking-[0.16em]">Phase 1 / local build</p>
+          <div className="flex items-center gap-3 font-mono uppercase tracking-[0.16em]">
+            <NavLink
+              className="rounded-full px-2 py-1 underline underline-offset-4 hover:text-ink"
+              to="/about"
+            >
+              About
+            </NavLink>
+            <p>Local-first / v1</p>
+          </div>
         </div>
       </footer>
     </div>
