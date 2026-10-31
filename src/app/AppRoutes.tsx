@@ -5,6 +5,9 @@ import { AppLayout } from '@/app/AppLayout';
 import { HomePage } from '@/app/pages/HomePage';
 import { NotFoundPage } from '@/app/pages/NotFoundPage';
 
+const AboutPage = lazy(() =>
+  import('@/app/pages/AboutPage').then((module) => ({ default: module.AboutPage })),
+);
 const HistoryPage = lazy(() =>
   import('@/app/pages/HistoryPage').then((module) => ({ default: module.HistoryPage })),
 );
@@ -23,6 +26,7 @@ export function AppRoutes() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route index element={<HomePage />} />
+        <Route path="about" element={<AboutPage />} />
         <Route path="history" element={<HistoryPage />} />
         <Route path="results/:id" element={<ResultDetailPage />} />
         <Route path="shared" element={<SharedResultPage />} />
