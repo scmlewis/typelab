@@ -120,6 +120,8 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 
 - [x] Quote mode
 - [x] Custom text mode
+- [x] About page and below-the-fold field notes
+- [x] Open Graph/Twitter metadata and 1200×630 social card
 - [ ] Additional languages/language packs
 - [x] Saved presets (named bench setups, saved in settings and backup)
 - [x] Theme setting (light, dark, system) with pre-paint boot and migration

@@ -25,7 +25,7 @@ async function runTenWords(page: Page) {
   await expect(page.getByTestId('result-panel')).toBeVisible();
 }
 
-test('the bench, settings, and history have no detectable WCAG A/AA violations', async ({
+test('the bench, settings, history, and about have no detectable WCAG A/AA violations', async ({
   page,
 }) => {
   await page.goto('/');
@@ -48,6 +48,13 @@ test('the bench, settings, and history have no detectable WCAG A/AA violations',
   const history = await analyse(page);
 
   expect(history.violations, format(history.violations)).toEqual([]);
+
+  await page.goto('/about');
+  await expect(page.getByRole('heading', { name: 'About the lab.' })).toBeVisible();
+
+  const about = await analyse(page);
+
+  expect(about.violations, format(about.violations)).toEqual([]);
 });
 
 test('a finished run and its share panel are accessible', async ({ page }) => {
