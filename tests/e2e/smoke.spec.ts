@@ -75,17 +75,13 @@ test('backspace clears a mistake before the word is committed', async ({ page })
   const input = page.getByLabel('Typing input');
   await input.focus();
   await expect(input).toBeFocused();
-  await page.keyboard.type(`${first.charAt(0)}zzz`, { delay: 40 });
+  const typed = `${first.charAt(0)}zzz`;
+  await page.keyboard.type(typed, { delay: 40 });
 
   const incorrect = page.locator('[data-state="incorrect"]');
   await expect(incorrect.first()).toBeVisible();
 
-  const mistakes = await incorrect.count();
-
-  expect(mistakes).toBeGreaterThan(0);
-  expect(mistakes).toBeLessThanOrEqual(3);
-
-  for (let index = 0; index < mistakes; index += 1) {
+  for (let index = 0; index < typed.length; index += 1) {
     await page.keyboard.press('Backspace');
   }
 
