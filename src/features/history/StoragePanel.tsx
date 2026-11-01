@@ -11,8 +11,8 @@ export interface StorageRepository {
 }
 
 interface StoragePanelProps {
-  repository?: StorageRepository;
-  now?: () => Date;
+  repository?: StorageRepository | undefined;
+  now?: (() => Date) | undefined;
 }
 
 type PendingDelete = 'older' | 'all' | null;

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { StoragePanel } from '@/features/history/StoragePanel';
+import type { StorageSummary } from '@/features/history/resultRepository';
 
 const NOW = new Date('2026-11-01T12:00:00.000Z');
 const SUMMARY = {
@@ -13,7 +14,7 @@ const SUMMARY = {
   olderThan90Days: 3,
 };
 
-function createRepository(summary = SUMMARY) {
+function createRepository(summary: StorageSummary = SUMMARY) {
   return {
     getStorageSummary: vi.fn(() => Promise.resolve(summary)),
     deleteOlderThan: vi.fn(() => Promise.resolve(3)),

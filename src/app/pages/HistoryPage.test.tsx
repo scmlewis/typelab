@@ -283,7 +283,13 @@ describe('history page', () => {
     );
 
     await screen.findByText('3 of 5 runs');
-    await user.click(screen.getAllByRole('button', { name: /delete run/i })[0]);
+    const [firstDeleteButton] = screen.getAllByRole('button', { name: /delete run/i });
+
+    if (firstDeleteButton === undefined) {
+      throw new Error('expected a delete button for the first row');
+    }
+
+    await user.click(firstDeleteButton);
 
     await waitFor(() => {
       expect(remove).toHaveBeenCalledWith('result-3');
