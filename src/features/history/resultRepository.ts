@@ -7,6 +7,20 @@ import type { TypelabDatabase } from '@/features/history/typelabDatabase';
 
 export const DEFAULT_HISTORY_LIMIT = 50;
 export const MAX_HISTORY_LIMIT = 200;
+export const STORAGE_RETENTION_DAYS = 90;
+
+export interface StorageSummary {
+  count: number;
+  bytes: number;
+  oldestCompletedAt: string | null;
+  newestCompletedAt: string | null;
+  olderThan90Days: number;
+}
+
+/** ISO timestamp exactly `STORAGE_RETENTION_DAYS` before `now`. */
+export function storageCutoff(now: Date = new Date()): string {
+  return new Date(now.getTime() - STORAGE_RETENTION_DAYS * 86_400_000).toISOString();
+}
 
 export interface HistoryQuery {
   limit?: number;
@@ -138,6 +152,58 @@ export class LocalResultRepository {
 
   async delete(id: string): Promise<void> {
     await this.db.results.delete(id);
+  }
+
+  /**
+   * Estimates how much space history takes. `bytes` is the UTF-8 length of
+   * each row's JSON, not the browser's storage quota or IndexedDB overhead.
+   */
+  async getStorageSummary(now: Date = new Date()): Promise<StorageSummary> {
+    const cutoff = storageCutoff(now);
+    const encoder = new TextEncoder();
+    let bytes = 0;
+
+    await this.db.results.each((result) => {
+      bytes += encoder.encode(JSON.stringify(result)).length;
+    });
+
+    const [count, olderThan90Days, oldest, newest] = await Promise.all([
+      this.db.results.count(),
+      this.db.results.where('completedAt').below(cutoff).count(),
+      this.db.results.orderBy('completedAt').first(),
+      this.db.results.orderBy('completedAt').last(),
+    ]);
+
+    return {
+      count,
+      bytes,
+      oldestCompletedAt: oldest?.completedAt ?? null,
+      newestCompletedAt: newest?.completedAt ?? null,
+      olderThan90Days,
+    };
+  }
+
+  /** Deletes every run completed strictly before `cutoffIso`. */
+  deleteOlderThan(cutoffIso: string): Promise<number> {
+    return this.db.transaction('rw', this.db.results, async () => {
+      const keys = await this.db.results.where('completedAt').below(cutoffIso).primaryKeys();
+
+      if (keys.length > 0) {
+        await this.db.results.bulkDelete(keys);
+      }
+
+      return keys.length;
+    });
+  }
+
+  /** Clears history but leaves the meta table, and settings, untouched. */
+  deleteAll(): Promise<number> {
+    return this.db.transaction('rw', this.db.results, async () => {
+      const count = await this.db.results.count();
+      await this.db.results.clear();
+
+      return count;
+    });
   }
 
   /**

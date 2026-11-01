@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { DEFAULT_TIMED_CONFIG, DEFAULT_WORDS_CONFIG } from '@/engine/config';
 import type { TestResult } from '@/engine/types';
-import { LocalResultRepository } from '@/features/history/resultRepository';
+import { LocalResultRepository, storageCutoff } from '@/features/history/resultRepository';
 import { TypelabDatabase } from '@/features/history/typelabDatabase';
 
 const databases: TypelabDatabase[] = [];
@@ -242,5 +242,74 @@ describe('local result repository', () => {
     await repository.save(second);
 
     await expect(repository.getAll()).resolves.toEqual([second, first]);
+  });
+
+  it('summarises count, size, dates, and runs older than 90 days', async () => {
+    const { repository } = createRepository();
+    const now = new Date('2026-11-01T12:00:00.000Z');
+    const older = makeResult({ completedAt: '2026-08-02T12:00:00.000Z' });
+    const boundary = makeResult({ completedAt: '2026-08-03T12:00:00.000Z' });
+    const newer = makeResult({ completedAt: '2026-10-01T12:00:00.000Z' });
+
+    for (const result of [older, boundary, newer]) {
+      await repository.save(result);
+    }
+
+    const expectedBytes = [older, boundary, newer].reduce(
+      (total, result) => total + new TextEncoder().encode(JSON.stringify(result)).length,
+      0,
+    );
+    const summary = await repository.getStorageSummary(now);
+
+    expect(summary).toEqual({
+      count: 3,
+      bytes: expectedBytes,
+      oldestCompletedAt: older.completedAt,
+      newestCompletedAt: newer.completedAt,
+      olderThan90Days: 1,
+    });
+    expect(storageCutoff(now)).toBe('2026-08-03T12:00:00.000Z');
+  });
+
+  it('returns an empty storage summary', async () => {
+    const { repository } = createRepository();
+
+    await expect(
+      repository.getStorageSummary(new Date('2026-11-01T12:00:00.000Z')),
+    ).resolves.toEqual({
+      count: 0,
+      bytes: 0,
+      oldestCompletedAt: null,
+      newestCompletedAt: null,
+      olderThan90Days: 0,
+    });
+  });
+
+  it('deletes only runs strictly older than the cutoff', async () => {
+    const { repository } = createRepository();
+    const older = makeResult({ completedAt: '2026-08-02T12:00:00.000Z' });
+    const boundary = makeResult({ completedAt: '2026-08-03T12:00:00.000Z' });
+    const newer = makeResult({ completedAt: '2026-10-01T12:00:00.000Z' });
+
+    for (const result of [older, boundary, newer]) {
+      await repository.save(result);
+    }
+
+    await expect(repository.deleteOlderThan('2026-08-03T12:00:00.000Z')).resolves.toBe(1);
+    await expect(repository.list({ includeExcluded: true })).resolves.toMatchObject({
+      total: 2,
+      items: [{ id: newer.id }, { id: boundary.id }],
+    });
+  });
+
+  it('deletes all runs and keeps metadata', async () => {
+    const { repository } = createRepository();
+    await repository.save(makeResult());
+    await repository.save(makeResult());
+    await repository.setMeta('lastExportAt', '2026-10-27T12:00:00.000Z');
+
+    await expect(repository.deleteAll()).resolves.toBe(2);
+    await expect(repository.list({ includeExcluded: true })).resolves.toMatchObject({ total: 0 });
+    await expect(repository.getMeta('lastExportAt')).resolves.toBe('2026-10-27T12:00:00.000Z');
   });
 });
