@@ -204,7 +204,8 @@ export function BackupPanel({ repository }: BackupPanelProps) {
   return (
     <section
       aria-labelledby="backup-title"
-      className="mt-8 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
+      className="mt-8 scroll-mt-6 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
+      id="backup"
     >
       <h2 className="font-display text-2xl tracking-tight" id="backup-title">
         Backup and export

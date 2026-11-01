@@ -20,11 +20,27 @@ function createRepository() {
   return { repository, save, reset };
 }
 
+function createStorageRepository() {
+  return {
+    getStorageSummary: vi.fn(() =>
+      Promise.resolve({
+        count: 0,
+        bytes: 0,
+        oldestCompletedAt: null,
+        newestCompletedAt: null,
+        olderThan90Days: 0,
+      }),
+    ),
+    deleteOlderThan: vi.fn(() => Promise.resolve(0)),
+    deleteAll: vi.fn(() => Promise.resolve(0)),
+  };
+}
+
 function renderPage(repository: SettingsRepositoryLike) {
   return render(
     <MemoryRouter>
       <SettingsProvider repository={repository}>
-        <SettingsPage />
+        <SettingsPage storageRepository={createStorageRepository()} />
       </SettingsProvider>
     </MemoryRouter>,
   );
@@ -351,5 +367,13 @@ describe('settings page', () => {
       presets: [{ ...preset, name: 'sprint' }],
     });
     expect(screen.getByText(/updated “sprint”/i)).toBeInTheDocument();
+  });
+
+  it('shows history storage controls', async () => {
+    const { repository } = createRepository();
+    renderPage(repository);
+
+    expect(await screen.findByRole('heading', { name: 'Storage and cleanup' })).toBeInTheDocument();
+    expect(screen.getByTestId('storage-summary')).toHaveTextContent('0 runs');
   });
 });

@@ -5,6 +5,8 @@ import { Link } from 'react-router';
 import { DURATION_OPTIONS, WORD_COUNT_OPTIONS } from '@/engine/config';
 import type { ErrorPolicy } from '@/engine/types';
 import { BackupPanel } from '@/features/history/BackupPanel';
+import { StoragePanel } from '@/features/history/StoragePanel';
+import type { StorageRepository } from '@/features/history/StoragePanel';
 import {
   DEFAULT_SETTINGS,
   MAX_PRESETS,
@@ -71,7 +73,11 @@ const CARET_STYLES: readonly { value: CaretStyle; label: string }[] = [
   { value: 'underline', label: 'Underline' },
 ];
 
-export function SettingsPage() {
+export function SettingsPage({
+  storageRepository,
+}: {
+  storageRepository?: StorageRepository;
+} = {}) {
   const { settings, status, updateTestDefaults, updateAppearance, updatePresets, resetSettings } =
     useSettings();
   const [confirmingReset, setConfirmingReset] = useState(false);
@@ -614,6 +620,8 @@ export function SettingsPage() {
           </ul>
         )}
       </fieldset>
+
+      <StoragePanel repository={storageRepository} />
 
       <BackupPanel />
 
