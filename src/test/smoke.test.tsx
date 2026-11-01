@@ -36,4 +36,18 @@ describe('app shell', () => {
 
     expect(screen.getByRole('heading', { name: /not in the notebook/i })).toBeInTheDocument();
   });
+
+  it('keeps the field notes beside the bench, not inside it', () => {
+    render(
+      <MemoryRouter>
+        <AppRoutes />
+      </MemoryRouter>,
+    );
+
+    const bench = screen.getByRole('region', { name: /the typing bench/i });
+    const notes = screen.getByRole('region', { name: /built for practice/i });
+
+    expect(notes.parentElement).toBe(bench.parentElement);
+    expect(bench.contains(notes)).toBe(false);
+  });
 });

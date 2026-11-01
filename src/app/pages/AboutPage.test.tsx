@@ -29,6 +29,8 @@ describe('about page', () => {
     expect(screen.getByText(/no accounts/i)).toBeInTheDocument();
     expect(screen.getByText(/cloud sync/i)).toBeInTheDocument();
     expect(screen.getByText(/leaderboards/i)).toBeInTheDocument();
+    expect(screen.getByText(/no application server/i)).toBeInTheDocument();
+    expect(screen.queryByText(/with no account and no server/i)).not.toBeInTheDocument();
     expect(screen.getByText(/tracking/i)).toBeInTheDocument();
 
     expect(screen.getByText(/under free, backspace removes/i)).toBeInTheDocument();

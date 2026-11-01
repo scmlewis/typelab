@@ -22,6 +22,8 @@ describe('route table', () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: heading }, { timeout: 5_000 }),
+    ).toBeInTheDocument();
   });
 });

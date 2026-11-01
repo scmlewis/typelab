@@ -1,5 +1,7 @@
 import { Link } from 'react-router';
 
+import { Eyebrow } from '@/app/components/Eyebrow';
+
 const SECTIONS = [
   {
     id: 'about-measures',
@@ -106,9 +108,7 @@ const SECTIONS = [
 export function AboutPage() {
   return (
     <article aria-labelledby="about-title" className="max-w-2xl">
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
-        Field notes / About
-      </p>
+      <Eyebrow>Field notes / About</Eyebrow>
       <h1
         className="mt-3 font-display text-4xl leading-none tracking-tight sm:text-5xl"
         id="about-title"
@@ -117,7 +117,8 @@ export function AboutPage() {
       </h1>
       <p className="mt-4 text-sm leading-6 text-ink-muted">
         TypeLab is a local-first typing laboratory for measuring speed, accuracy, and consistency.
-        It runs entirely in this browser, with no account and no server.
+        It runs entirely in this browser, with no account and no application server; the app is
+        static files.
       </p>
 
       <div className="mt-10 space-y-10">

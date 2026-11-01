@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 
+import { Eyebrow } from '@/app/components/Eyebrow';
 import { TypingTest } from '@/features/typing/TypingTest';
 import { useSettings } from '@/features/settings/settingsContext';
 
@@ -7,47 +8,45 @@ export function HomePage() {
   const { status } = useSettings();
 
   return (
-    <section aria-labelledby="bench-title">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
-            Instrument / 001
-          </p>
-          <h1
-            className="mt-2 font-display text-4xl leading-none tracking-tight sm:mt-3 sm:text-5xl"
-            id="bench-title"
-          >
-            The typing bench.
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-ink-muted sm:hidden">
-            A quiet test of speed and accuracy.
+    <>
+      <section aria-labelledby="bench-title">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <Eyebrow>Instrument / 001</Eyebrow>
+            <h1
+              className="mt-2 font-display text-4xl leading-none tracking-tight sm:mt-3 sm:text-5xl"
+              id="bench-title"
+            >
+              The typing bench.
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-ink-muted sm:hidden">
+              A quiet test of speed and accuracy.
+            </p>
+          </div>
+          <p className="hidden max-w-sm text-sm leading-6 text-ink-muted sm:block">
+            A quiet test of speed and accuracy. No account, no cloud, no tracking — results stay in
+            this browser.
           </p>
         </div>
-        <p className="hidden max-w-sm text-sm leading-6 text-ink-muted sm:block">
-          A quiet test of speed and accuracy. No account, no cloud, no tracking — results stay in
-          this browser.
-        </p>
-      </div>
 
-      {status === 'loading' ? (
-        <div
-          aria-busy="true"
-          className="mt-6 rounded-card border border-line bg-surface p-8 shadow-card sm:mt-8"
-        >
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-ink-muted">
-            Preparing the bench…
-          </p>
-        </div>
-      ) : (
-        <TypingTest />
-      )}
+        {status === 'loading' ? (
+          <div
+            aria-busy="true"
+            className="mt-6 rounded-card border border-line bg-surface p-8 shadow-card sm:mt-8"
+          >
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-ink-muted">
+              Preparing the bench…
+            </p>
+          </div>
+        ) : (
+          <TypingTest />
+        )}
+      </section>
 
       <section aria-labelledby="why-title" className="mt-12 border-t border-line/80 pt-8 sm:mt-16">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
-              Field notes / 01
-            </p>
+            <Eyebrow>Field notes / 01</Eyebrow>
             <h2
               className="mt-2 font-display text-2xl leading-tight tracking-tight sm:text-3xl"
               id="why-title"
@@ -86,6 +85,6 @@ export function HomePage() {
           </li>
         </ul>
       </section>
-    </section>
+    </>
   );
 }

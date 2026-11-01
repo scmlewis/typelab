@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 
+import { Eyebrow } from '@/app/components/Eyebrow';
 import { DURATION_OPTIONS, WORD_COUNT_OPTIONS } from '@/engine/config';
 import type { ErrorPolicy } from '@/engine/types';
 import { BackupPanel } from '@/features/history/BackupPanel';
@@ -148,7 +149,7 @@ export function SettingsPage({
 
   return (
     <section aria-labelledby="settings-title" className="max-w-2xl">
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">Settings</p>
+      <Eyebrow>Settings</Eyebrow>
       <h1
         className="mt-3 font-display text-4xl leading-tight tracking-tight sm:text-5xl"
         id="settings-title"

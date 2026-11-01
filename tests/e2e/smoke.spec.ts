@@ -168,6 +168,19 @@ test('the typing surface stays above the fold on a phone viewport', async ({ pag
   expect(box!.x + box!.width).toBeLessThanOrEqual(390);
 });
 
+test('the typing surface stays above the fold at 375 by 667', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto('/');
+
+  const surface = page.getByTestId('typing-surface');
+  const box = await surface.boundingBox();
+
+  expect(box).not.toBeNull();
+  expect(box!.y + box!.height).toBeLessThanOrEqual(667);
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(375);
+});
+
 test('settings persist across a reload and reach the bench', async ({ page }) => {
   await page.goto('/settings');
 

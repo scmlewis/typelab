@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router';
 
+import { Eyebrow } from '@/app/components/Eyebrow';
 import { getCategoryKey, getComparableCategoryKey } from '@/engine/config';
 import { getQuoteById } from '@/engine/content/quotes';
 import { isDegenerateResult } from '@/engine/scoring';
@@ -107,7 +108,7 @@ export function ResultDetailPage({ repository }: ResultDetailPageProps) {
   if (state.status === 'error') {
     return (
       <section aria-labelledby="result-title" className="max-w-2xl">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">Run detail</p>
+        <Eyebrow>Run detail</Eyebrow>
         <h1
           className="mt-3 font-display text-4xl leading-tight tracking-tight sm:text-5xl"
           id="result-title"
@@ -130,7 +131,7 @@ export function ResultDetailPage({ repository }: ResultDetailPageProps) {
   if (state.status === 'missing') {
     return (
       <section aria-labelledby="result-title" className="max-w-2xl">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">Run detail</p>
+        <Eyebrow>Run detail</Eyebrow>
         <h1
           className="mt-3 font-display text-4xl leading-tight tracking-tight sm:text-5xl"
           id="result-title"
@@ -157,7 +158,7 @@ export function ResultDetailPage({ repository }: ResultDetailPageProps) {
 
   return (
     <section aria-labelledby="result-title" className="max-w-3xl">
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">Run detail</p>
+      <Eyebrow>Run detail</Eyebrow>
       <h1
         className="mt-3 font-display text-4xl leading-tight tracking-tight sm:text-5xl"
         id="result-title"

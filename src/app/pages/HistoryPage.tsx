@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react
 import { Trash2 } from 'lucide-react';
 import { Link } from 'react-router';
 
+import { Eyebrow } from '@/app/components/Eyebrow';
 import type { TestMode, TestResult } from '@/engine/types';
 import { getResultRepository } from '@/features/history/resultRepository';
 import type {
@@ -137,7 +138,7 @@ export function HistoryPage({ repository }: HistoryPageProps) {
 
   return (
     <section aria-labelledby="history-title">
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">The record book</p>
+      <Eyebrow>The record book</Eyebrow>
       <h1
         className="mt-3 font-display text-4xl leading-none tracking-tight sm:text-5xl"
         id="history-title"

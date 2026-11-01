@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router';
 
+import { Eyebrow } from '@/app/components/Eyebrow';
 import {
   describeShareMode,
   decodeShareSnapshot,
@@ -15,7 +16,7 @@ export function SharedResultPage() {
   if (snapshot === null) {
     return (
       <section aria-labelledby="shared-title" className="max-w-2xl">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">Shared run</p>
+        <Eyebrow>Shared run</Eyebrow>
         <h1
           className="mt-3 font-display text-4xl leading-tight tracking-tight sm:text-5xl"
           id="shared-title"
@@ -51,7 +52,7 @@ export function SharedResultPage() {
 
   return (
     <section aria-labelledby="shared-title" className="max-w-3xl" data-testid="shared-result">
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">Shared run</p>
+      <Eyebrow>Shared run</Eyebrow>
       <h1
         className="mt-3 font-display text-4xl leading-tight tracking-tight sm:text-5xl"
         id="shared-title"
