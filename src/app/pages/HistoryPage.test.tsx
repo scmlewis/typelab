@@ -71,6 +71,7 @@ describe('history page', () => {
     expect(screen.getByText('1 run')).toBeInTheDocument();
     expect(repository.list).toHaveBeenCalledWith({
       limit: 100,
+      offset: 0,
       includeExcluded: false,
     });
   });
@@ -140,6 +141,7 @@ describe('history page', () => {
     await waitFor(() => {
       expect(repository.list).toHaveBeenLastCalledWith({
         limit: 100,
+        offset: 0,
         includeExcluded: true,
       });
     });
@@ -157,13 +159,14 @@ describe('history page', () => {
     await waitFor(() => {
       expect(repository.list).toHaveBeenLastCalledWith({
         limit: 100,
+        offset: 0,
         includeExcluded: false,
         testMode: 'words',
       });
     });
   });
 
-  it('deletes only after confirmation, then reloads', async () => {
+  it('deletes only after confirmation, then removes the row in place', async () => {
     const user = userEvent.setup();
     const repository = createRepository();
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
@@ -180,10 +183,128 @@ describe('history page', () => {
     await waitFor(() => {
       expect(repository.delete).toHaveBeenCalledWith('result-1');
     });
-    await waitFor(() => {
-      expect(repository.list).toHaveBeenCalledTimes(2);
-    });
+    expect(screen.queryByText('30 seconds')).not.toBeInTheDocument();
+    expect(screen.getByText(/no runs match yet/i)).toBeInTheDocument();
+    expect(repository.list).toHaveBeenCalledTimes(1);
 
     confirm.mockRestore();
+  });
+
+  it('loads older runs without duplicating a row', async () => {
+    const user = userEvent.setup();
+    const first = [
+      makeResult({ id: 'result-3', completedAt: '2026-10-29T12:00:00.000Z' }),
+      makeResult({ id: 'result-2', completedAt: '2026-10-28T12:00:00.000Z' }),
+    ];
+    const list = vi
+      .fn()
+      .mockResolvedValueOnce({ items: first, total: 3, hasMore: true })
+      .mockResolvedValueOnce({
+        items: [first[1], makeResult({ id: 'result-1' })],
+        total: 3,
+        hasMore: false,
+      });
+
+    render(
+      <MemoryRouter>
+        <HistoryPage repository={{ list, delete: async () => {} }} />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('2 of 3 runs');
+    await user.click(screen.getByRole('button', { name: 'Load more' }));
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('link', { name: '30 seconds' })).toHaveLength(3);
+    });
+    expect(list).toHaveBeenLastCalledWith({
+      limit: 100,
+      offset: 2,
+      includeExcluded: false,
+    });
+    expect(screen.queryByRole('button', { name: 'Load more' })).not.toBeInTheDocument();
+  });
+
+  it('resets paging when a filter changes', async () => {
+    const user = userEvent.setup();
+    const first = [makeResult({ id: 'result-2' }), makeResult({ id: 'result-1' })];
+    const list = vi
+      .fn()
+      .mockResolvedValueOnce({ items: first, total: 3, hasMore: true })
+      .mockResolvedValueOnce({
+        items: [makeResult({ id: 'result-0' })],
+        total: 3,
+        hasMore: false,
+      })
+      .mockResolvedValueOnce({
+        items: [makeResult({ id: 'words-1', testMode: 'words' })],
+        total: 1,
+        hasMore: false,
+      });
+
+    render(
+      <MemoryRouter>
+        <HistoryPage repository={{ list, delete: async () => {} }} />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('2 of 3 runs');
+    await user.click(screen.getByRole('button', { name: 'Load more' }));
+    await screen.findByText('3 runs');
+
+    await user.selectOptions(screen.getByLabelText('Filter by mode'), 'words');
+
+    await waitFor(() => {
+      expect(list).toHaveBeenLastCalledWith({
+        limit: 100,
+        offset: 0,
+        includeExcluded: false,
+        testMode: 'words',
+      });
+    });
+    expect(screen.getByText('1 run')).toBeInTheDocument();
+  });
+
+  it('keeps paging consistent after deleting a loaded row', async () => {
+    const user = userEvent.setup();
+    const items = [
+      makeResult({ id: 'result-3' }),
+      makeResult({ id: 'result-2' }),
+      makeResult({ id: 'result-1' }),
+    ];
+    const list = vi.fn(() => Promise.resolve({ items, total: 5, hasMore: true }));
+    const remove = vi.fn(() => Promise.resolve());
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    render(
+      <MemoryRouter>
+        <HistoryPage repository={{ list, delete: remove }} />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('3 of 5 runs');
+    await user.click(screen.getAllByRole('button', { name: /delete run/i })[0]);
+
+    await waitFor(() => {
+      expect(remove).toHaveBeenCalledWith('result-3');
+    });
+    expect(screen.getByText('2 of 4 runs')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Load more' })).toBeInTheDocument();
+  });
+
+  it('caps the trend chart at the newest 200 loaded runs', async () => {
+    const results = Array.from({ length: 201 }, (_, index) =>
+      makeResult({
+        id: `result-${index}`,
+        clientTestId: `client-${index}`,
+        completedAt: new Date(Date.UTC(2026, 9, 1, 0, index)).toISOString(),
+      }),
+    );
+
+    renderPage(createRepository(results));
+
+    expect(
+      await screen.findByText('The chart shows the latest 200 loaded runs.'),
+    ).toBeInTheDocument();
   });
 });

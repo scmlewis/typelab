@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react
 import { Trash2 } from 'lucide-react';
 import { Link } from 'react-router';
 
-import type { TestMode } from '@/engine/types';
+import type { TestMode, TestResult } from '@/engine/types';
 import { getResultRepository } from '@/features/history/resultRepository';
 import type {
   HistoryPage as HistoryPageData,
@@ -22,6 +22,9 @@ const MODE_FILTERS: readonly { value: 'all' | TestMode; label: string }[] = [
   { value: 'quote', label: 'Quote' },
   { value: 'custom', label: 'Custom' },
 ];
+
+const PAGE_SIZE = 100;
+const CHART_LIMIT = 200;
 
 /** The chart library is only needed once a second run exists. */
 const TrendChart = lazy(async () => {
@@ -43,24 +46,36 @@ export function HistoryPage({ repository }: HistoryPageProps) {
   const activeRepository = useMemo(() => repository ?? getResultRepository(), [repository]);
   const [mode, setMode] = useState<'all' | TestMode>('all');
   const [includeExcluded, setIncludeExcluded] = useState(false);
-  const [page, setPage] = useState<HistoryPageData | null>(null);
+  const [items, setItems] = useState<TestResult[]>([]);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [loadingMore, setLoadingMore] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const buildQuery = useCallback(
+    (offset: number): HistoryQuery => ({
+      limit: PAGE_SIZE,
+      offset,
+      includeExcluded,
+      ...(mode === 'all' ? {} : { testMode: mode }),
+    }),
+    [includeExcluded, mode],
+  );
 
   useEffect(() => {
     let cancelled = false;
 
     setStatus('loading');
+    setItems([]);
     activeRepository
-      .list({
-        limit: 100,
-        includeExcluded,
-        ...(mode === 'all' ? {} : { testMode: mode }),
-      })
+      .list(buildQuery(0))
       .then((loaded) => {
         if (!cancelled) {
-          setPage(loaded);
+          setItems(loaded.items);
+          setTotal(loaded.total);
+          setHasMore(loaded.hasMore);
           setStatus('ready');
         }
       })
@@ -73,7 +88,29 @@ export function HistoryPage({ repository }: HistoryPageProps) {
     return () => {
       cancelled = true;
     };
-  }, [activeRepository, includeExcluded, mode, reloadToken]);
+  }, [activeRepository, buildQuery, reloadToken]);
+
+  const loadMore = useCallback(async () => {
+    setLoadingMore(true);
+    setActionError(null);
+
+    try {
+      const next = await activeRepository.list(buildQuery(items.length));
+
+      // A save can land between requests. Offset paging may repeat a row;
+      // merging by id keeps the list honest without a refetch.
+      setItems((current) => {
+        const seen = new Set(current.map((result) => result.id));
+        return [...current, ...next.items.filter((result) => !seen.has(result.id))];
+      });
+      setTotal(next.total);
+      setHasMore(next.hasMore);
+    } catch {
+      setActionError('Could not load older runs. Your history is unchanged.');
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [activeRepository, buildQuery, items.length]);
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -81,17 +118,22 @@ export function HistoryPage({ repository }: HistoryPageProps) {
         return;
       }
 
-      setDeleteError(null);
+      setActionError(null);
 
       try {
         await activeRepository.delete(id);
-        setReloadToken((token) => token + 1);
+        setItems((current) => current.filter((result) => result.id !== id));
+        setTotal((current) => Math.max(0, current - 1));
       } catch {
-        setDeleteError('Could not delete this run. Nothing was removed.');
+        setActionError('Could not delete this run. Nothing was removed.');
       }
     },
     [activeRepository],
   );
+
+  const summary = hasMore
+    ? `${items.length} of ${total} runs`
+    : `${total} ${total === 1 ? 'run' : 'runs'}`;
 
   return (
     <section aria-labelledby="history-title">
@@ -138,16 +180,16 @@ export function HistoryPage({ repository }: HistoryPageProps) {
           Show excluded runs
         </label>
 
-        {page ? (
+        {status === 'ready' ? (
           <p className="ml-auto font-mono text-xs uppercase tracking-[0.14em] text-ink-muted">
-            {page.total} {page.total === 1 ? 'run' : 'runs'}
+            {summary}
           </p>
         ) : null}
       </div>
 
-      {deleteError ? (
+      {actionError ? (
         <p className="mt-4 text-sm text-danger" role="alert">
-          {deleteError}
+          {actionError}
         </p>
       ) : null}
 
@@ -168,11 +210,11 @@ export function HistoryPage({ repository }: HistoryPageProps) {
         </div>
       ) : null}
 
-      {status === 'loading' && page === null ? (
+      {status === 'loading' && items.length === 0 ? (
         <p className="mt-8 text-sm text-ink-muted">Reading the record book…</p>
       ) : null}
 
-      {status === 'ready' && page && page.items.length === 0 ? (
+      {status === 'ready' && items.length === 0 ? (
         <div className="mt-8 rounded-card border border-line bg-surface p-6">
           <p className="text-sm leading-6 text-ink-muted">
             No runs match yet. Finish a test on the bench and it will appear here.
@@ -180,7 +222,7 @@ export function HistoryPage({ repository }: HistoryPageProps) {
         </div>
       ) : null}
 
-      {page && page.items.length > 1 ? (
+      {items.length > 1 ? (
         <Suspense
           fallback={
             <p className="mt-8 text-sm text-ink-muted" role="status">
@@ -188,13 +230,19 @@ export function HistoryPage({ repository }: HistoryPageProps) {
             </p>
           }
         >
-          <TrendChart results={page.items} />
+          <TrendChart results={items.slice(0, CHART_LIMIT)} />
         </Suspense>
       ) : null}
 
-      {page && page.items.length > 0 ? (
+      {items.length > CHART_LIMIT ? (
+        <p className="mt-2 text-xs text-ink-muted">
+          The chart shows the latest {CHART_LIMIT} loaded runs.
+        </p>
+      ) : null}
+
+      {items.length > 0 ? (
         <ul className="mt-2 divide-y divide-line/70">
-          {page.items.map((result) => (
+          {items.map((result) => (
             <li
               className="grid gap-3 py-5 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto_auto] sm:items-center"
               key={result.id}
@@ -240,10 +288,19 @@ export function HistoryPage({ repository }: HistoryPageProps) {
         </ul>
       ) : null}
 
-      {page?.hasMore ? (
-        <p className="mt-6 text-xs leading-5 text-ink-muted">
-          Showing the most recent 100 runs. Filters and deletion still apply to older runs.
-        </p>
+      {hasMore ? (
+        <div className="mt-6">
+          <button
+            className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={loadingMore}
+            onClick={() => {
+              void loadMore();
+            }}
+            type="button"
+          >
+            {loadingMore ? 'Loading…' : 'Load more'}
+          </button>
+        </div>
       ) : null}
     </section>
   );
