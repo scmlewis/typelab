@@ -41,16 +41,18 @@ export function HomePage() {
         )}
       </section>
 
-      <figure className="mt-12 sm:mt-16">
-        <img
-          alt="Close-up of mechanical keyboard keys in a cool, high-contrast lab setting."
-          className="w-full rounded-card border border-line object-cover shadow-card"
-          height={500}
-          loading="lazy"
-          src="https://picsum.photos/seed/typelab-keyboard-bench/1600/500"
-          width={1600}
-        />
-      </figure>
+      <div
+        aria-hidden="true"
+        className="mt-12 overflow-hidden rounded-card border border-line bg-surface shadow-card sm:mt-16"
+      >
+        <div className="border-b border-line/80 px-5 py-3 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">
+          Sample text
+        </div>
+        <p className="px-6 py-10 font-display text-2xl leading-relaxed tracking-tight text-ink sm:px-8 sm:text-3xl">
+          The quick brown fox jumps over the lazy dog, and the bench keeps score of every keystroke.
+          <span className="ml-1 inline-block h-[1.1em] w-[2px] translate-y-[0.15em] bg-accent align-middle" />
+        </p>
+      </div>
 
       <section aria-labelledby="why-title" className="mt-12 border-t border-line/80 pt-8 sm:mt-16">
         <div className="flex flex-wrap items-end justify-between gap-4">
