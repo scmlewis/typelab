@@ -54,9 +54,18 @@ against the previous 277.4 kB, concentrated in the settings chunk that now carri
 
 | Check | Result |
 | --- | --- |
-| CI on `main` | pending |
-| Cloudflare Pages deploy | pending |
-| Production smoke | pending |
+| CI on `main` | pass — run 41393595882 at `9572f1c`, 81/81 E2E |
+| Cloudflare Pages deploy | pass — run 41393960462, live asset `index-DoBLXCjk.js` |
+| Production smoke | pass — 14/14 checks, no console or page errors |
+
+The smoke ran against https://typelab-b1o.pages.dev in a fresh Chromium profile at 375×667 and
+verified: the typing surface above the fold, a completed ten-word run, the corrected About copy, the
+saved run in history, the storage summary, the `#backup` reminder link, the disabled older-than
+control on fresh history, the two-step delete-all confirmation, cancel leaving the run intact,
+deletion through to “Deleted 1 run.”, the empty state, and history reflecting the deletion.
+
+An earlier deploy of `0786d84` passed the same smoke before the singular-copy fix; `9572f1c` is the
+deployed commit recorded above.
 
 ## Mode regression matrix
 
