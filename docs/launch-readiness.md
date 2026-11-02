@@ -30,7 +30,7 @@ Expected signals:
 | Typecheck | `tsc -b` exits 0 |
 | Lint | `eslint . --max-warnings=0` exits 0 |
 | Format | `prettier --check` reports all files formatted |
-| Unit | Vitest exits 0 (currently 337 tests across 40 files) |
+| Unit | Vitest exits 0 (currently 338 tests across 40 files) |
 | Build | Vite writes `dist/` |
 | Bundle budget | `check:bundle` passes entry JS ≤ 160 kB, all JS ≤ 340 kB, all CSS ≤ 16 kB (gzip) |
 | E2E | Playwright exits 0 on Chromium, Firefox, and WebKit (currently 24 tests per browser) |

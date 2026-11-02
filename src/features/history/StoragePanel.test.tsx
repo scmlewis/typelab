@@ -119,6 +119,22 @@ describe('storage panel', () => {
     ).toBeInTheDocument();
   });
 
+  it('uses the singular when one run is involved', async () => {
+    const user = userEvent.setup();
+    const repository = createRepository({ ...SUMMARY, count: 1, olderThan90Days: 0 });
+    repository.deleteAll.mockResolvedValueOnce(1);
+    renderPanel(repository);
+    await screen.findByTestId('storage-summary');
+
+    await user.click(screen.getByRole('button', { name: 'Delete all runs' }));
+
+    const confirm = screen.getByRole('button', { name: 'Confirm delete all 1 run' });
+
+    await user.click(confirm);
+
+    expect(await screen.findByText('Deleted 1 run.')).toBeInTheDocument();
+  });
+
   it('links to the backup panel', async () => {
     renderPanel(createRepository());
 

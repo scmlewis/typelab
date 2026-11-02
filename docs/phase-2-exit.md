@@ -34,7 +34,7 @@ Full local gate, run from the slice branch before push:
 | Typecheck | `npm run typecheck` | pass |
 | Lint | `npm run lint` | pass, 0 warnings |
 | Format | `npm run format:check` | pass, all files formatted |
-| Unit | `npm test` | pass, 337 tests across 40 files |
+| Unit | `npm test` | pass, 338 tests across 40 files |
 | Build | `npm run build` | pass |
 | Bundle budget | `npm run check:bundle` | pass |
 | E2E | `npm run test:e2e` | pass, 81 tests across Chromium, Firefox, WebKit |

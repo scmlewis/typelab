@@ -57,8 +57,8 @@ export function StoragePanel({ repository, now }: StoragePanelProps) {
 
       setStatus(
         kind === 'older'
-          ? `Deleted ${removed} runs older than 90 days.`
-          : `Deleted ${removed} runs.`,
+          ? `Deleted ${removed} ${removed === 1 ? 'run' : 'runs'} older than 90 days.`
+          : `Deleted ${removed} ${removed === 1 ? 'run' : 'runs'}.`,
       );
       setPending(null);
       await load();
@@ -172,7 +172,8 @@ export function StoragePanel({ repository, now }: StoragePanelProps) {
               }}
               type="button"
             >
-              Confirm delete all {summary?.count ?? 0} runs
+              Confirm delete all {summary?.count ?? 0}{' '}
+              {(summary?.count ?? 0) === 1 ? 'run' : 'runs'}
             </button>
             <button
               className="text-xs font-medium underline underline-offset-4"
