@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { Link } from 'react-router';
 
@@ -54,6 +54,7 @@ export function HistoryPage({ repository }: HistoryPageProps) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
   const [actionError, setActionError] = useState<string | null>(null);
+  const requestId = useRef(0);
 
   const buildQuery = useCallback(
     (offset: number): HistoryQuery => ({
@@ -67,13 +68,18 @@ export function HistoryPage({ repository }: HistoryPageProps) {
 
   useEffect(() => {
     let cancelled = false;
+    const generation = requestId.current + 1;
 
+    requestId.current = generation;
     setStatus('loading');
     setItems([]);
+    setTotal(0);
+    setHasMore(false);
+    setLoadingMore(false);
     activeRepository
       .list(buildQuery(0))
       .then((loaded) => {
-        if (!cancelled) {
+        if (!cancelled && generation === requestId.current) {
           setItems(loaded.items);
           setTotal(loaded.total);
           setHasMore(loaded.hasMore);
@@ -81,7 +87,7 @@ export function HistoryPage({ repository }: HistoryPageProps) {
         }
       })
       .catch(() => {
-        if (!cancelled) {
+        if (!cancelled && generation === requestId.current) {
           setStatus('error');
         }
       });
@@ -92,11 +98,19 @@ export function HistoryPage({ repository }: HistoryPageProps) {
   }, [activeRepository, buildQuery, reloadToken]);
 
   const loadMore = useCallback(async () => {
+    const generation = requestId.current;
+
     setLoadingMore(true);
     setActionError(null);
 
     try {
       const next = await activeRepository.list(buildQuery(items.length));
+
+      // A filter change or a delete while this page was in flight makes the
+      // response describe a list that no longer exists.
+      if (generation !== requestId.current) {
+        return;
+      }
 
       // A save can land between requests. Offset paging may repeat a row;
       // merging by id keeps the list honest without a refetch.
@@ -107,9 +121,13 @@ export function HistoryPage({ repository }: HistoryPageProps) {
       setTotal(next.total);
       setHasMore(next.hasMore);
     } catch {
-      setActionError('Could not load older runs. Your history is unchanged.');
+      if (generation === requestId.current) {
+        setActionError('Could not load older runs. Your history is unchanged.');
+      }
     } finally {
-      setLoadingMore(false);
+      if (generation === requestId.current) {
+        setLoadingMore(false);
+      }
     }
   }, [activeRepository, buildQuery, items.length]);
 
@@ -289,7 +307,7 @@ export function HistoryPage({ repository }: HistoryPageProps) {
         </ul>
       ) : null}
 
-      {hasMore ? (
+      {status === 'ready' && hasMore ? (
         <div className="mt-6">
           <button
             className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong disabled:cursor-not-allowed disabled:opacity-60"

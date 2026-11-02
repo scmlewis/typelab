@@ -298,6 +298,45 @@ describe('history page', () => {
     expect(screen.getByRole('button', { name: 'Load more' })).toBeInTheDocument();
   });
 
+  it('discards a stale page after the filter changes', async () => {
+    const user = userEvent.setup();
+    const first = [makeResult({ id: 'result-2' }), makeResult({ id: 'result-1' })];
+    const words = makeResult({ id: 'words-1', testMode: 'words', wordCount: 10 });
+    let resolveStale: (page: HistoryPageData) => void = () => {};
+    const stale = new Promise<HistoryPageData>((resolve) => {
+      resolveStale = resolve;
+    });
+    const list = vi
+      .fn()
+      .mockResolvedValueOnce({ items: first, total: 3, hasMore: true })
+      .mockReturnValueOnce(stale)
+      .mockResolvedValueOnce({ items: [words], total: 1, hasMore: false });
+
+    render(
+      <MemoryRouter>
+        <HistoryPage repository={{ list, delete: async () => {} }} />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('2 of 3 runs');
+    await user.click(screen.getByRole('button', { name: 'Load more' }));
+    await user.selectOptions(screen.getByLabelText('Filter by mode'), 'words');
+    await screen.findByText('1 run');
+
+    resolveStale({
+      items: [makeResult({ id: 'stale-1', completedAt: '2026-10-01T12:00:00.000Z' })],
+      total: 9,
+      hasMore: true,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('1 run')).toBeInTheDocument();
+    });
+    expect(screen.getByText('10 words')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: '30 seconds' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Load more' })).not.toBeInTheDocument();
+  });
+
   it('caps the trend chart at the newest 200 loaded runs', async () => {
     const results = Array.from({ length: 201 }, (_, index) =>
       makeResult({

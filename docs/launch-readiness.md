@@ -30,14 +30,14 @@ Expected signals:
 | Typecheck | `tsc -b` exits 0 |
 | Lint | `eslint . --max-warnings=0` exits 0 |
 | Format | `prettier --check` reports all files formatted |
-| Unit | Vitest exits 0 (currently 338 tests across 40 files) |
+| Unit | Vitest exits 0 (currently 339 tests across 40 files) |
 | Build | Vite writes `dist/` |
 | Bundle budget | `check:bundle` passes entry JS ≤ 160 kB, all JS ≤ 340 kB, all CSS ≤ 16 kB (gzip) |
-| E2E | Playwright exits 0 on Chromium, Firefox, and WebKit (currently 24 tests per browser) |
+| E2E | Playwright exits 0 on Chromium, Firefox, and WebKit (currently 27 tests per browser, 81 total) |
 
 The bundle budget is deliberately below the current measurements so a regression fails the gate
-rather than silently shipping. Current measurement is roughly 120 kB entry JS, 276 kB all JS, and
-6.5 kB CSS (gzip).
+rather than silently shipping. Current measurement is 133.8 kB entry JS, 278.7 kB all JS, and
+6.6 kB CSS (gzip).
 
 E2E runs against `npm run build && npm run preview` on `127.0.0.1:4173`. Install browsers once with
 `npx playwright install chromium firefox webkit`.
