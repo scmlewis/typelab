@@ -94,7 +94,7 @@ export function AppLayout() {
             >
               About
             </NavLink>
-            <p>Local-first / v1</p>
+            <p>Local-first</p>
           </div>
         </div>
       </footer>

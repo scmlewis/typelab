@@ -76,7 +76,7 @@ describe('share card', () => {
       ),
     );
 
-    expect(text.attribution).toBe(`${quote.source} — ${quote.author}`);
+    expect(text.attribution).toBe(`${quote.source} - ${quote.author}`);
     expect(text.excluded).toBe(true);
   });
 

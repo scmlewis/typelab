@@ -1,6 +1,5 @@
 import { Link } from 'react-router';
 
-import { Eyebrow } from '@/app/components/Eyebrow';
 import { TypingTest } from '@/features/typing/TypingTest';
 import { useSettings } from '@/features/settings/settingsContext';
 
@@ -12,7 +11,6 @@ export function HomePage() {
       <section aria-labelledby="bench-title">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <Eyebrow>Instrument / 001</Eyebrow>
             <h1
               className="mt-2 font-display text-4xl leading-none tracking-tight sm:mt-3 sm:text-5xl"
               id="bench-title"
@@ -24,7 +22,7 @@ export function HomePage() {
             </p>
           </div>
           <p className="hidden max-w-sm text-sm leading-6 text-ink-muted sm:block">
-            A quiet test of speed and accuracy. No account, no cloud, no tracking — results stay in
+            A quiet test of speed and accuracy. No account, no cloud, no tracking. Results stay in
             this browser.
           </p>
         </div>
@@ -43,10 +41,20 @@ export function HomePage() {
         )}
       </section>
 
+      <figure className="mt-12 sm:mt-16">
+        <img
+          alt="Close-up of mechanical keyboard keys in a cool, high-contrast lab setting."
+          className="w-full rounded-card border border-line object-cover shadow-card"
+          height={500}
+          loading="lazy"
+          src="https://picsum.photos/seed/typelab-keyboard-bench/1600/500"
+          width={1600}
+        />
+      </figure>
+
       <section aria-labelledby="why-title" className="mt-12 border-t border-line/80 pt-8 sm:mt-16">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <Eyebrow>Field notes / 01</Eyebrow>
             <h2
               className="mt-2 font-display text-2xl leading-tight tracking-tight sm:text-3xl"
               id="why-title"
@@ -62,7 +70,7 @@ export function HomePage() {
           </Link>
         </div>
 
-        <ul className="mt-6 grid gap-5 sm:grid-cols-3">
+        <ul className="mt-6 grid gap-5 sm:grid-cols-2">
           <li>
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-ink">Local-first</p>
             <p className="mt-2 text-sm leading-6 text-ink-muted">

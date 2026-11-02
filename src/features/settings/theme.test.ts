@@ -21,12 +21,12 @@ describe('theme preference', () => {
     applyTheme('dark');
 
     expect(document.documentElement.dataset['theme']).toBe('dark');
-    expect(meta.getAttribute('content')).toBe('#141816');
+    expect(meta.getAttribute('content')).toBe('#13161a');
 
     applyTheme('light');
 
     expect(document.documentElement.dataset['theme']).toBe('light');
-    expect(meta.getAttribute('content')).toBe('#f4efe4');
+    expect(meta.getAttribute('content')).toBe('#f2f3f0');
 
     meta.remove();
   });

@@ -5,11 +5,11 @@ import { formatDuration, formatPercent } from '@/features/typing/format';
 export const SHARE_CARD_WIDTH = 1_200;
 export const SHARE_CARD_HEIGHT = 630;
 
-const PAPER = '#f4efe4';
-const INK = '#1e231f';
-const MUTED = '#67675f';
-const LINE = '#d7cebd';
-const ACCENT = '#a8451f';
+const PAPER = '#f2f3f0';
+const INK = '#1a1d21';
+const MUTED = '#5a5f66';
+const LINE = '#d6d7d3';
+const ACCENT = '#1f6f5f';
 
 const MONO = "ui-monospace, 'SFMono-Regular', 'Cascadia Code', Menlo, Consolas, monospace";
 const EDITORIAL = "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif";
@@ -40,7 +40,7 @@ export function shareCardText(snapshot: SharedResultSnapshot): ShareCardText {
     attribution:
       snapshot.quoteSource === null
         ? null
-        : `${snapshot.quoteSource}${snapshot.quoteAuthor === null ? '' : ` — ${snapshot.quoteAuthor}`}`,
+        : `${snapshot.quoteSource}${snapshot.quoteAuthor === null ? '' : ` - ${snapshot.quoteAuthor}`}`,
     date: formatShareDate(snapshot.completedAt),
     excluded: snapshot.excluded,
   };

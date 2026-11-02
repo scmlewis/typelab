@@ -1,7 +1,5 @@
 import { Link } from 'react-router';
 
-import { Eyebrow } from '@/app/components/Eyebrow';
-
 const SECTIONS = [
   {
     id: 'about-measures',
@@ -108,7 +106,6 @@ const SECTIONS = [
 export function AboutPage() {
   return (
     <article aria-labelledby="about-title" className="max-w-2xl">
-      <Eyebrow>Field notes / About</Eyebrow>
       <h1
         className="mt-3 font-display text-4xl leading-none tracking-tight sm:text-5xl"
         id="about-title"
@@ -124,10 +121,7 @@ export function AboutPage() {
       <div className="mt-10 space-y-10">
         {SECTIONS.map((section) => (
           <section aria-labelledby={section.id} key={section.id}>
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-ink-muted">
-              {section.label}
-            </p>
-            <h2 className="mt-2 font-display text-2xl leading-tight tracking-tight" id={section.id}>
+            <h2 className="font-display text-2xl leading-tight tracking-tight" id={section.id}>
               {section.title}
             </h2>
             {section.body}

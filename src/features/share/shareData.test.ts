@@ -184,7 +184,7 @@ describe('share summary', () => {
     );
     const summary = buildShareSummary(snapshot);
 
-    expect(summary).toContain(`${quote.source} — ${quote.author}`);
+    expect(summary).toContain(`${quote.source} - ${quote.author}`);
     expect(summary).toContain('Unranked run');
     expect(summary).not.toContain('/shared?r=');
   });

@@ -5,8 +5,8 @@ import type { ThemePreference } from '@/features/settings/settings';
 export type ResolvedTheme = 'light' | 'dark';
 
 const BROWSER_CHROME: Record<ResolvedTheme, string> = {
-  light: '#f4efe4',
-  dark: '#141816',
+  light: '#f2f3f0',
+  dark: '#13161a',
 };
 
 export function resolveTheme(

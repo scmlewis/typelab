@@ -248,7 +248,7 @@ export function TypingSurface({
             <p className="max-w-sm rounded-xl border border-line/80 bg-surface px-5 py-3 text-center text-sm leading-6 text-ink-muted shadow-sm">
               {status === 'idle'
                 ? 'Click here or start typing.'
-                : 'Focus lost. The clock keeps running — click or type to resume.'}
+                : 'Focus lost. The clock keeps running. Click or type to resume.'}
             </p>
           </div>
         ) : null}

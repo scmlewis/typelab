@@ -153,7 +153,7 @@ export function buildShareSummary(
   ];
 
   if (snapshot.quoteSource !== null) {
-    const author = snapshot.quoteAuthor === null ? '' : ` — ${snapshot.quoteAuthor}`;
+    const author = snapshot.quoteAuthor === null ? '' : ` - ${snapshot.quoteAuthor}`;
     lines.push(`${snapshot.quoteSource}${author}`);
   }
 
