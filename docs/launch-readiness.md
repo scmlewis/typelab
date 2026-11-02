@@ -30,10 +30,10 @@ Expected signals:
 | Typecheck | `tsc -b` exits 0 |
 | Lint | `eslint . --max-warnings=0` exits 0 |
 | Format | `prettier --check` reports all files formatted |
-| Unit | Vitest exits 0 (currently 308 tests across 35 files) |
+| Unit | Vitest exits 0 (currently 337 tests across 40 files) |
 | Build | Vite writes `dist/` |
 | Bundle budget | `check:bundle` passes entry JS ≤ 160 kB, all JS ≤ 340 kB, all CSS ≤ 16 kB (gzip) |
-| E2E | Playwright exits 0 on Chromium, Firefox, and WebKit (currently 23 tests per browser) |
+| E2E | Playwright exits 0 on Chromium, Firefox, and WebKit (currently 24 tests per browser) |
 
 The bundle budget is deliberately below the current measurements so a regression fails the gate
 rather than silently shipping. Current measurement is roughly 120 kB entry JS, 276 kB all JS, and
@@ -152,6 +152,11 @@ assuming the automated suite covers it.
   local reproduction.
 - Recharts is lazy-loaded as its own chunk; first chart render fetches it on demand.
 - Safari private browsing can make IndexedDB behave inconsistently; export before relying on it.
+- Bulk deletion is manual, irreversible, and history-only: settings, presets, and metadata are kept.
+  Export a backup first, because there is no undo.
+- Another open tab does not see a bulk deletion until it refreshes, the same as per-row deletion.
+- History loads 100 rows at a time; the trend chart covers the newest 200 loaded rows and says so.
+- The storage figure is an estimate of the TypeLab history payload, not the browser quota.
 
 ## Rollback
 

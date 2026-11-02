@@ -127,19 +127,19 @@ Living checklist. Update status as work lands. A checked item means the acceptan
 - [x] Theme setting (light, dark, system) with pre-paint boot and migration
 - [x] Typography, text width, caret style/blink, and opt-in key sounds
 - [ ] Custom colour palette
-- [ ] Live stats visibility, error highlighting, quick restart
+- [x] Live stats visibility, error highlighting, quick restart
 - [x] Reduced-motion preference (System / Reduced / Full)
 - [x] Settings import/export + reset
 - [x] Speed chart from interval samples
 - [x] Detailed result analysis
 - [x] History page + filters
 - [x] Trend charts (net WPM + accuracy across filtered runs)
-- [ ] Personal bests per category
-- [ ] Pagination/incremental loading
+- [x] Personal bests per category
+- [x] Pagination/incremental loading
 - [x] JSON backup export/import with preview and duplicate merge
 - [x] Invalid/oversized import handling
 - [x] CSV export
-- [ ] Storage usage display and retention controls
+- [x] Storage usage display and retention controls
 - [x] Share text summary + image card
 - [x] Optional encoded URL share with size cap
 - [ ] Mode regression matrix
