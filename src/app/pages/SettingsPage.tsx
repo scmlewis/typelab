@@ -3,6 +3,11 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 
 import { Eyebrow } from '@/app/components/Eyebrow';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { ChoiceButton, ChoiceGroup, SegmentedControl } from '@/components/ui/Choice';
+import { Fieldset } from '@/components/ui/Fieldset';
+import { buttonStyles } from '@/components/ui/styles';
 import { DURATION_OPTIONS, WORD_COUNT_OPTIONS } from '@/engine/config';
 import type { ErrorPolicy } from '@/engine/types';
 import { BackupPanel } from '@/features/history/BackupPanel';
@@ -161,38 +166,21 @@ export function SettingsPage({
         that is already in progress.
       </p>
 
-      <fieldset
-        className="mt-8 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
-        disabled={status === 'loading'}
-      >
-        <legend className="sr-only">Appearance</legend>
-        <p
-          aria-hidden="true"
-          className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-ink-muted"
-        >
-          Appearance
-        </p>
+      <Fieldset disabled={status === 'loading'} legend="Appearance">
         <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-4">
           <div>
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">
               Theme
             </p>
-            <div
-              aria-label="Theme"
-              className="mt-2 flex rounded-full border border-line bg-surface-strong/50 p-0.5"
-              role="group"
-            >
-              {THEMES.map((theme) => (
-                <Choice
-                  active={appearance.theme === theme.value}
-                  key={theme.value}
-                  label={theme.label}
-                  onClick={() => {
-                    void updateAppearance({ theme: theme.value });
-                  }}
-                />
-              ))}
-            </div>
+            <SegmentedControl
+              className="mt-2"
+              label="Theme"
+              onChange={(value) => {
+                void updateAppearance({ theme: value });
+              }}
+              options={THEMES}
+              value={appearance.theme}
+            />
           </div>
           <p className="max-w-xs text-xs leading-5 text-ink-muted">
             System follows your device&apos;s light or dark setting.
@@ -202,7 +190,7 @@ export function SettingsPage({
         <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-4">
           <Group label="Motion">
             {MOTIONS.map((motion) => (
-              <Choice
+              <ChoiceButton
                 active={appearance.motion === motion.value}
                 key={motion.value}
                 label={motion.label}
@@ -217,24 +205,13 @@ export function SettingsPage({
             stops the caret blinking.
           </p>
         </div>
-      </fieldset>
+      </Fieldset>
 
-      <fieldset
-        className="mt-8 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
-        disabled={status === 'loading'}
-      >
-        <legend className="sr-only">Typography and typing</legend>
-        <p
-          aria-hidden="true"
-          className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-ink-muted"
-        >
-          Typography &amp; typing
-        </p>
-
+      <Fieldset disabled={status === 'loading'} legend="Typography & typing">
         <div className="mt-5 flex flex-wrap items-start gap-x-8 gap-y-5">
           <Group label="Font">
             {FONTS.map((font) => (
-              <Choice
+              <ChoiceButton
                 active={appearance.fontFamily === font.value}
                 key={font.value}
                 label={font.label}
@@ -247,7 +224,7 @@ export function SettingsPage({
 
           <Group label="Size">
             {FONT_SIZES.map((size) => (
-              <Choice
+              <ChoiceButton
                 active={appearance.fontSize === size.value}
                 key={size.value}
                 label={size.label}
@@ -260,7 +237,7 @@ export function SettingsPage({
 
           <Group label="Text width">
             {TEXT_WIDTHS.map((width) => (
-              <Choice
+              <ChoiceButton
                 active={appearance.textWidth === width.value}
                 key={width.value}
                 label={width.label}
@@ -276,7 +253,7 @@ export function SettingsPage({
           <div>
             <Group label="Caret">
               {CARET_STYLES.map((caret) => (
-                <Choice
+                <ChoiceButton
                   active={appearance.caret.style === caret.value}
                   key={caret.value}
                   label={caret.label}
@@ -338,45 +315,26 @@ export function SettingsPage({
             </p>
           </div>
         </div>
-      </fieldset>
+      </Fieldset>
 
-      <fieldset
-        className="mt-8 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
-        disabled={status === 'loading'}
-      >
-        <legend className="sr-only">Test defaults</legend>
-        <p
-          aria-hidden="true"
-          className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-ink-muted"
-        >
-          Test defaults
-        </p>
-
+      <Fieldset disabled={status === 'loading'} legend="Test defaults">
         <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-5">
           <div>
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">
               Mode
             </p>
-            <div
-              aria-label="Default test mode"
-              className="mt-2 flex rounded-full border border-line bg-surface-strong/50 p-0.5"
-              role="group"
-            >
-              <Choice
-                active={defaults.mode === 'timed'}
-                label="Time"
-                onClick={() => {
-                  save({ mode: 'timed' });
-                }}
-              />
-              <Choice
-                active={defaults.mode === 'words'}
-                label="Words"
-                onClick={() => {
-                  save({ mode: 'words' });
-                }}
-              />
-            </div>
+            <SegmentedControl
+              className="mt-2"
+              label="Default test mode"
+              onChange={(value) => {
+                save({ mode: value });
+              }}
+              options={[
+                { value: 'timed', label: 'Time' },
+                { value: 'words', label: 'Words' },
+              ]}
+              value={defaults.mode}
+            />
           </div>
 
           {defaults.mode === 'timed' ? (
@@ -384,9 +342,9 @@ export function SettingsPage({
               <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">
                 Duration
               </p>
-              <div aria-label="Default duration" className="mt-2 flex gap-1" role="group">
+              <ChoiceGroup className="mt-2" label="Default duration">
                 {DURATION_OPTIONS.map((duration) => (
-                  <Choice
+                  <ChoiceButton
                     active={defaults.durationSeconds === duration}
                     key={duration}
                     label={String(duration)}
@@ -395,16 +353,16 @@ export function SettingsPage({
                     }}
                   />
                 ))}
-              </div>
+              </ChoiceGroup>
             </div>
           ) : (
             <div>
               <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">
                 Word count
               </p>
-              <div aria-label="Default word count" className="mt-2 flex gap-1" role="group">
+              <ChoiceGroup className="mt-2" label="Default word count">
                 {WORD_COUNT_OPTIONS.map((count) => (
-                  <Choice
+                  <ChoiceButton
                     active={defaults.wordCount === count}
                     key={count}
                     label={String(count)}
@@ -413,7 +371,7 @@ export function SettingsPage({
                     }}
                   />
                 ))}
-              </div>
+              </ChoiceGroup>
             </div>
           )}
 
@@ -495,13 +453,9 @@ export function SettingsPage({
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-line/70 pt-5">
-          <button
-            className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong"
-            onClick={handleReset}
-            type="button"
-          >
+          <Button onClick={handleReset}>
             {confirmingReset ? 'Confirm reset' : 'Reset to defaults'}
-          </button>
+          </Button>
           {confirmingReset ? (
             <>
               <span className="text-xs text-ink-muted">
@@ -524,19 +478,9 @@ export function SettingsPage({
             </span>
           )}
         </div>
-      </fieldset>
+      </Fieldset>
 
-      <fieldset
-        className="mt-8 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
-        disabled={status === 'loading'}
-      >
-        <legend className="sr-only">Saved presets</legend>
-        <p
-          aria-hidden="true"
-          className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-ink-muted"
-        >
-          Presets
-        </p>
+      <Fieldset disabled={status === 'loading'} legend="Presets">
         <p className="mt-2 max-w-lg text-xs leading-5 text-ink-muted">
           Name the current test defaults and reuse them from the bench. Presets travel with your
           settings backup.
@@ -567,13 +511,9 @@ export function SettingsPage({
               value={presetName}
             />
           </div>
-          <button
-            className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={presetName.trim().length === 0}
-            type="submit"
-          >
+          <Button disabled={presetName.trim().length === 0} type="submit">
             Save current setup
-          </button>
+          </Button>
         </form>
         <p className="mt-2 min-h-4 text-xs leading-5 text-ink-muted" role="status">
           {presetStatus}
@@ -597,36 +537,36 @@ export function SettingsPage({
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-2">
-                  <button
-                    className="rounded-full border border-line px-3 py-1.5 text-xs font-medium transition-colors hover:bg-surface-strong"
+                  <Button
                     onClick={() => {
                       applyPreset(preset);
                     }}
-                    type="button"
+                    size="sm"
                   >
                     Use
-                  </button>
-                  <button
-                    className="rounded-full px-3 py-1.5 text-xs font-medium text-ink-muted underline underline-offset-4 transition-colors hover:text-ink"
+                  </Button>
+                  <Button
+                    className="underline underline-offset-4"
                     onClick={() => {
                       deletePreset(preset);
                     }}
-                    type="button"
+                    size="sm"
+                    variant="ghost"
                   >
                     Delete
-                  </button>
+                  </Button>
                 </div>
               </li>
             ))}
           </ul>
         )}
-      </fieldset>
+      </Fieldset>
 
       <StoragePanel repository={storageRepository} />
 
       <BackupPanel />
 
-      <div className="mt-8 rounded-card border border-line bg-surface p-6">
+      <Card className="mt-8">
         <h2 className="font-display text-2xl tracking-tight">Local-only by design</h2>
         <p className="mt-3 text-sm leading-6 text-ink-muted">
           TypeLab has no account system, cloud database, or third-party analytics. Settings and
@@ -634,20 +574,14 @@ export function SettingsPage({
           backup.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <Link
-            className="inline-flex items-center rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-transform hover:-translate-y-0.5"
-            to="/"
-          >
+          <Link className={buttonStyles({ variant: 'primary' })} to="/">
             Back to the test
           </Link>
-          <Link
-            className="inline-flex items-center rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong"
-            to="/history"
-          >
+          <Link className={buttonStyles()} to="/history">
             Open local history
           </Link>
         </div>
-      </div>
+      </Card>
     </section>
   );
 }
@@ -664,34 +598,10 @@ function Group({ children, label }: { children: ReactNode; label: string }) {
   return (
     <div>
       <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">{label}</p>
-      <div aria-label={label} className="mt-2 flex gap-1" role="group">
+      <ChoiceGroup className="mt-2" label={label}>
         {children}
-      </div>
+      </ChoiceGroup>
     </div>
-  );
-}
-
-function Choice({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      aria-pressed={active}
-      className={[
-        'rounded-full px-3 py-1.5 font-mono text-xs transition-colors',
-        active ? 'bg-ink text-paper' : 'text-ink-muted hover:bg-surface-strong hover:text-ink',
-      ].join(' ')}
-      onClick={onClick}
-      type="button"
-    >
-      {label}
-    </button>
   );
 }
 

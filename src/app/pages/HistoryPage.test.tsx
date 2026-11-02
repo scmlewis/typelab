@@ -169,16 +169,20 @@ describe('history page', () => {
   it('deletes only after confirmation, then removes the row in place', async () => {
     const user = userEvent.setup();
     const repository = createRepository();
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
 
     renderPage(repository);
     await screen.findByText('30 seconds');
 
     await user.click(screen.getByRole('button', { name: /delete run/i }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(repository.delete).not.toHaveBeenCalled();
 
-    confirm.mockReturnValue(true);
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(repository.delete).not.toHaveBeenCalled();
+
     await user.click(screen.getByRole('button', { name: /delete run/i }));
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
 
     await waitFor(() => {
       expect(repository.delete).toHaveBeenCalledWith('result-1');
@@ -186,8 +190,6 @@ describe('history page', () => {
     expect(screen.queryByText('30 seconds')).not.toBeInTheDocument();
     expect(screen.getByText(/no runs match yet/i)).toBeInTheDocument();
     expect(repository.list).toHaveBeenCalledTimes(1);
-
-    confirm.mockRestore();
   });
 
   it('loads older runs without duplicating a row', async () => {
@@ -274,7 +276,6 @@ describe('history page', () => {
     ];
     const list = vi.fn(() => Promise.resolve({ items, total: 5, hasMore: true }));
     const remove = vi.fn(() => Promise.resolve());
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
 
     render(
       <MemoryRouter>
@@ -290,6 +291,7 @@ describe('history page', () => {
     }
 
     await user.click(firstDeleteButton);
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
 
     await waitFor(() => {
       expect(remove).toHaveBeenCalledWith('result-3');

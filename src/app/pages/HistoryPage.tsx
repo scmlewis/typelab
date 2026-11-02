@@ -3,6 +3,10 @@ import { Trash2 } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { Eyebrow } from '@/app/components/Eyebrow';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Metric } from '@/components/ui/Metric';
 import type { TestMode, TestResult } from '@/engine/types';
 import { getResultRepository } from '@/features/history/resultRepository';
 import type {
@@ -54,6 +58,7 @@ export function HistoryPage({ repository }: HistoryPageProps) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<TestResult | null>(null);
   const requestId = useRef(0);
 
   const buildQuery = useCallback(
@@ -133,10 +138,6 @@ export function HistoryPage({ repository }: HistoryPageProps) {
 
   const handleDelete = useCallback(
     async (id: string) => {
-      if (!window.confirm('Delete this run? This cannot be undone.')) {
-        return;
-      }
-
       setActionError(null);
 
       try {
@@ -213,20 +214,19 @@ export function HistoryPage({ repository }: HistoryPageProps) {
       ) : null}
 
       {status === 'error' ? (
-        <div className="mt-8 rounded-card border border-danger/30 bg-danger/5 p-6">
+        <Card className="mt-8 border-danger/30 bg-danger/5">
           <p className="text-sm leading-6 text-danger">
             Local history could not be opened. Browser storage may be blocked.
           </p>
-          <button
-            className="mt-4 rounded-full border border-line px-4 py-2 text-sm font-medium"
+          <Button
+            className="mt-4"
             onClick={() => {
               setReloadToken((token) => token + 1);
             }}
-            type="button"
           >
             Try again
-          </button>
-        </div>
+          </Button>
+        </Card>
       ) : null}
 
       {status === 'loading' && items.length === 0 ? (
@@ -234,11 +234,11 @@ export function HistoryPage({ repository }: HistoryPageProps) {
       ) : null}
 
       {status === 'ready' && items.length === 0 ? (
-        <div className="mt-8 rounded-card border border-line bg-surface p-6">
+        <Card className="mt-8">
           <p className="text-sm leading-6 text-ink-muted">
             No runs match yet. Finish a test on the bench and it will appear here.
           </p>
-        </div>
+        </Card>
       ) : null}
 
       {items.length > 1 ? (
@@ -289,19 +289,19 @@ export function HistoryPage({ repository }: HistoryPageProps) {
                   </p>
                 ) : null}
               </div>
-              <HistoryMetric label="Net WPM" value={result.netWpm.toFixed(1)} />
-              <HistoryMetric label="Accuracy" value={formatPercent(result.accuracy, 1)} />
-              <HistoryMetric label="Consistency" value={formatPercent(result.consistency, 1)} />
-              <button
+              <Metric label="Net WPM" value={result.netWpm.toFixed(1)} />
+              <Metric label="Accuracy" value={formatPercent(result.accuracy, 1)} />
+              <Metric label="Consistency" value={formatPercent(result.consistency, 1)} />
+              <Button
                 aria-label={`Delete run from ${formatTimestamp(result.completedAt)}`}
-                className="justify-self-start rounded-full border border-line p-2 text-ink-muted transition-colors hover:border-danger/40 hover:text-danger sm:justify-self-end"
+                className="justify-self-start text-ink-muted hover:border-danger/40 hover:text-danger sm:justify-self-end"
                 onClick={() => {
-                  void handleDelete(result.id);
+                  setPendingDelete(result);
                 }}
-                type="button"
+                size="icon"
               >
                 <Trash2 aria-hidden="true" size={14} />
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
@@ -309,27 +309,33 @@ export function HistoryPage({ repository }: HistoryPageProps) {
 
       {status === 'ready' && hasMore ? (
         <div className="mt-6">
-          <button
-            className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong disabled:cursor-not-allowed disabled:opacity-60"
+          <Button
             disabled={loadingMore}
             onClick={() => {
               void loadMore();
             }}
-            type="button"
           >
             {loadingMore ? 'Loading…' : 'Load more'}
-          </button>
+          </Button>
         </div>
       ) : null}
-    </section>
-  );
-}
 
-function HistoryMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3 sm:block sm:text-right">
-      <p className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-ink-muted">{label}</p>
-      <p className="font-mono text-sm tabular-nums text-ink">{value}</p>
-    </div>
+      <ConfirmDialog
+        confirmLabel="Delete"
+        description="This removes the run from local history. It cannot be undone."
+        onCancel={() => {
+          setPendingDelete(null);
+        }}
+        onConfirm={() => {
+          if (pendingDelete !== null) {
+            void handleDelete(pendingDelete.id);
+          }
+
+          setPendingDelete(null);
+        }}
+        open={pendingDelete !== null}
+        title="Delete this run?"
+      />
+    </section>
   );
 }
