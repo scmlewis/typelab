@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Metric } from '@/components/ui/Metric';
+import { StatusMessage } from '@/components/ui/StatusMessage';
 import type { TestMode, TestResult } from '@/engine/types';
 import { getResultRepository } from '@/features/history/resultRepository';
 import type {
@@ -208,13 +209,13 @@ export function HistoryPage({ repository }: HistoryPageProps) {
       </div>
 
       {actionError ? (
-        <p className="mt-4 text-sm text-danger" role="alert">
+        <StatusMessage className="mt-4 text-sm" tone="error" variant="plain">
           {actionError}
-        </p>
+        </StatusMessage>
       ) : null}
 
       {status === 'error' ? (
-        <Card className="mt-8 border-danger/30 bg-danger/5">
+        <Card className="mt-8" tone="danger">
           <p className="text-sm leading-6 text-danger">
             Local history could not be opened. Browser storage may be blocked.
           </p>
@@ -296,11 +297,12 @@ export function HistoryPage({ repository }: HistoryPageProps) {
               </dl>
               <Button
                 aria-label={`Delete run from ${formatTimestamp(result.completedAt)}`}
-                className="justify-self-start text-ink-muted hover:border-danger/40 hover:text-danger sm:justify-self-end"
+                className="justify-self-start sm:justify-self-end"
                 onClick={() => {
                   setPendingDelete(result);
                 }}
                 size="icon"
+                variant="dangerGhost"
               >
                 <Trash2 aria-hidden="true" size={14} />
               </Button>

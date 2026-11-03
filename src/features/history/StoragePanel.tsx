@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { StatusMessage } from '@/components/ui/StatusMessage';
 import { getResultRepository, storageCutoff } from '@/features/history/resultRepository';
 import type { StorageSummary } from '@/features/history/resultRepository';
 import { formatTimestamp } from '@/features/typing/format';
@@ -73,10 +76,7 @@ export function StoragePanel({ repository, now }: StoragePanelProps) {
   const olderCount = summary?.olderThan90Days ?? 0;
 
   return (
-    <section
-      aria-labelledby="storage-title"
-      className="mt-8 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
-    >
+    <Card as="section" aria-labelledby="storage-title" className="mt-8">
       <h2 className="font-display text-2xl tracking-tight" id="storage-title">
         Storage and cleanup
       </h2>
@@ -86,9 +86,9 @@ export function StoragePanel({ repository, now }: StoragePanelProps) {
       </p>
 
       {error === null ? null : (
-        <p className="mt-3 text-xs leading-5" role="alert">
+        <StatusMessage className="mt-3" tone="error">
           {error}
-        </p>
+        </StatusMessage>
       )}
 
       {summary === null ? null : (
@@ -128,82 +128,74 @@ export function StoragePanel({ repository, now }: StoragePanelProps) {
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {pending === 'older' ? (
           <>
-            <button
-              className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong disabled:cursor-not-allowed disabled:opacity-60"
+            <Button
               disabled={busy}
               onClick={() => {
                 void runDelete('older');
               }}
-              type="button"
             >
               Confirm delete {olderCount} {olderCount === 1 ? 'run' : 'runs'}
-            </button>
-            <button
-              className="text-xs font-medium underline underline-offset-4"
+            </Button>
+            <Button
               disabled={busy}
               onClick={() => {
                 setPending(null);
               }}
-              type="button"
+              size="sm"
+              variant="ghost"
             >
               Cancel
-            </button>
+            </Button>
           </>
         ) : (
-          <button
-            className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong disabled:cursor-not-allowed disabled:opacity-60"
+          <Button
             disabled={!hasRuns || olderCount === 0 || busy}
             onClick={() => {
               setPending('older');
             }}
-            type="button"
           >
             Delete older than 90 days
-          </button>
+          </Button>
         )}
 
         {pending === 'all' ? (
           <>
-            <button
-              className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong disabled:cursor-not-allowed disabled:opacity-60"
+            <Button
               disabled={busy}
               onClick={() => {
                 void runDelete('all');
               }}
-              type="button"
             >
               Confirm delete all {summary?.count ?? 0}{' '}
               {(summary?.count ?? 0) === 1 ? 'run' : 'runs'}
-            </button>
-            <button
-              className="text-xs font-medium underline underline-offset-4"
+            </Button>
+            <Button
               disabled={busy}
               onClick={() => {
                 setPending(null);
               }}
-              type="button"
+              size="sm"
+              variant="ghost"
             >
               Cancel
-            </button>
+            </Button>
           </>
         ) : (
-          <button
-            className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong disabled:cursor-not-allowed disabled:opacity-60"
+          <Button
             disabled={!hasRuns || busy}
             onClick={() => {
               setPending('all');
             }}
-            type="button"
           >
             Delete all runs
-          </button>
+          </Button>
         )}
       </div>
 
-      <p className="mt-2 min-h-4 text-xs leading-5 text-ink-muted" role="status">
+      <StatusMessage className="mt-2 min-h-4" variant="plain">
         {busy ? 'Deleting…' : (status ?? '')}
-      </p>
-    </section>
+      </StatusMessage>
+    </Card>
   );
 }
 

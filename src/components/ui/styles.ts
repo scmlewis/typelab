@@ -1,6 +1,6 @@
 import { cn } from '@/lib/cn';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'dangerGhost';
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon' | 'link' | 'compact';
 export type ButtonWeight = 'normal' | 'medium';
 
@@ -12,6 +12,7 @@ const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   secondary: 'border border-line bg-surface text-ink hover:bg-surface-strong',
   ghost: 'text-ink-muted hover:bg-surface-strong hover:text-ink',
   danger: 'border border-danger/40 text-danger hover:bg-danger/10',
+  dangerGhost: 'text-ink-muted hover:bg-danger/10 hover:text-danger',
 };
 
 const BUTTON_SIZES: Record<ButtonSize, string> = {
@@ -69,20 +70,28 @@ export function controlStyles({
 }
 
 export type CardPadding = 'default' | 'roomy';
+export type CardTone = 'default' | 'danger';
 
-const CARD_BASE = 'rounded-card border border-line bg-surface shadow-card';
+const CARD_BASE = 'rounded-card border shadow-card';
 
 const CARD_PADDING: Record<CardPadding, string> = {
   default: 'p-5 sm:p-6',
   roomy: 'p-8',
 };
 
+const CARD_TONES: Record<CardTone, string> = {
+  default: 'border-line bg-surface',
+  danger: 'border-danger/30 bg-danger/5',
+};
+
 export function cardStyles({
   padding = 'default',
+  tone = 'default',
   className,
 }: {
   padding?: CardPadding | undefined;
+  tone?: CardTone | undefined;
   className?: string | undefined;
 } = {}): string {
-  return cn(CARD_BASE, CARD_PADDING[padding], className);
+  return cn(CARD_BASE, CARD_TONES[tone], CARD_PADDING[padding], className);
 }

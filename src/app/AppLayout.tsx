@@ -1,14 +1,16 @@
 import { Suspense } from 'react';
 import { NavLink, Outlet } from 'react-router';
 
+import { buttonStyles } from '@/components/ui/styles';
 import type { SettingsNotice } from '@/features/settings/settingsRepository';
 import { useSettings } from '@/features/settings/settingsContext';
 
 const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
-  [
-    'rounded-full px-3 py-1.5 text-sm transition-colors',
-    isActive ? 'bg-ink text-paper' : 'text-ink-muted hover:bg-surface-strong hover:text-ink',
-  ].join(' ');
+  buttonStyles({
+    variant: isActive ? 'primary' : 'ghost',
+    size: 'link',
+    weight: 'normal',
+  });
 
 const NOTICE_COPY: Record<SettingsNotice, string> = {
   corrupt:

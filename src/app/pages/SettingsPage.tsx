@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ChoiceButton, ChoiceGroup, SegmentedControl } from '@/components/ui/Choice';
 import { Fieldset } from '@/components/ui/Fieldset';
+import { StatusMessage } from '@/components/ui/StatusMessage';
 import { buttonStyles } from '@/components/ui/styles';
 import { DURATION_OPTIONS, WORD_COUNT_OPTIONS } from '@/engine/config';
 import type { ErrorPolicy } from '@/engine/types';
@@ -515,9 +516,9 @@ export function SettingsPage({
             Save current setup
           </Button>
         </form>
-        <p className="mt-2 min-h-4 text-xs leading-5 text-ink-muted" role="status">
+        <StatusMessage className="mt-2 min-h-4" variant="plain">
           {presetStatus}
-        </p>
+        </StatusMessage>
 
         {presets.length === 0 ? (
           <p className="mt-2 text-xs leading-5 text-ink-muted">

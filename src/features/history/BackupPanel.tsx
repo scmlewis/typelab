@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Overline } from '@/components/ui/Overline';
+import { StatusMessage } from '@/components/ui/StatusMessage';
+import { buttonStyles } from '@/components/ui/styles';
 import type { TestResult } from '@/engine/types';
+import { cn } from '@/lib/cn';
 import {
   buildBackup,
   describeImportSummary,
@@ -202,11 +208,7 @@ export function BackupPanel({ repository }: BackupPanelProps) {
   };
 
   return (
-    <section
-      aria-labelledby="backup-title"
-      className="mt-8 scroll-mt-6 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
-      id="backup"
-    >
+    <Card as="section" aria-labelledby="backup-title" className="mt-8 scroll-mt-6" id="backup">
       <h2 className="font-display text-2xl tracking-tight" id="backup-title">
         Backup and export
       </h2>
@@ -214,36 +216,33 @@ export function BackupPanel({ repository }: BackupPanelProps) {
         This browser is the only copy. Download a backup before clearing site data or switching
         devices. Imports merge by run ID and never overwrite an existing run.
       </p>
-      <p className="mt-3 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-ink-muted">
-        Last export: {lastExportAt ? formatTimestamp(lastExportAt) : 'never'}
+      <p className="mt-3">
+        <Overline>Last export: {lastExportAt ? formatTimestamp(lastExportAt) : 'never'}</Overline>
       </p>
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
-        <button
-          className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+        <Button
           disabled={busy}
           onClick={() => {
             void exportJson();
           }}
-          type="button"
+          variant="primary"
         >
           Export backup (.json)
-        </button>
-        <button
-          className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong disabled:opacity-50"
+        </Button>
+        <Button
           disabled={busy}
           onClick={() => {
             void exportCsv();
           }}
-          type="button"
         >
           Export CSV
-        </button>
+        </Button>
         <label
-          className={[
-            'inline-flex cursor-pointer items-center rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong',
-            busy ? 'pointer-events-none opacity-50' : '',
-          ].join(' ')}
+          className={cn(
+            buttonStyles({ className: 'cursor-pointer' }),
+            busy && 'pointer-events-none opacity-50',
+          )}
           htmlFor="import-backup"
         >
           Import backup
@@ -266,30 +265,21 @@ export function BackupPanel({ repository }: BackupPanelProps) {
       </div>
 
       {message ? (
-        <div
-          className={[
-            'mt-5 rounded-xl border px-4 py-3 text-xs leading-5',
-            message.kind === 'error'
-              ? 'border-danger/30 bg-danger/5 text-danger'
-              : 'border-line/80 bg-accent-soft/40 text-ink-muted',
-          ].join(' ')}
-          role={message.kind === 'error' ? 'alert' : 'status'}
+        <StatusMessage
+          className="mt-5"
+          details={
+            message.kind === 'error' && message.issues.length > 0
+              ? message.issues.map((issue) => `Row ${issue.row}: ${issue.message}`)
+              : undefined
+          }
+          tone={message.kind}
         >
-          <p>{message.text}</p>
-          {message.kind === 'error' && message.issues.length > 0 ? (
-            <ul className="mt-2 space-y-1">
-              {message.issues.map((issue) => (
-                <li key={`${issue.row}-${issue.message}`}>
-                  Row {issue.row}: {issue.message}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
+          {message.text}
+        </StatusMessage>
       ) : null}
 
       {pending ? (
-        <div className="mt-5 rounded-xl border border-line/80 bg-paper/60 px-4 py-4">
+        <div className="mt-5 rounded-control border border-line/80 bg-paper/60 px-4 py-4">
           <p className="text-sm font-medium">{pending.fileName}</p>
           <p className="mt-2 text-xs leading-5 text-ink-muted">
             {pending.fresh} new {pending.fresh === 1 ? 'run' : 'runs'}, {pending.duplicates}{' '}
@@ -308,32 +298,29 @@ export function BackupPanel({ repository }: BackupPanelProps) {
             Also replace my test defaults with the backup&apos;s settings
           </label>
           <div className="mt-4 flex flex-wrap gap-3">
-            <button
-              className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper disabled:opacity-50"
+            <Button
               disabled={busy}
               onClick={() => {
                 void applyImport();
               }}
-              type="button"
+              variant="primary"
             >
               {busy
                 ? 'Importing…'
                 : `Import ${pending.fresh} ${pending.fresh === 1 ? 'run' : 'runs'}`}
-            </button>
-            <button
-              className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong"
+            </Button>
+            <Button
               disabled={busy}
               onClick={() => {
                 setPending(null);
                 setMessage(null);
               }}
-              type="button"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}
-    </section>
+    </Card>
   );
 }

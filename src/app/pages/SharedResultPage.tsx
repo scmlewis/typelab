@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router';
 
 import { Eyebrow } from '@/app/components/Eyebrow';
+import { HeroStat, Metric } from '@/components/ui/Metric';
+import { buttonStyles } from '@/components/ui/styles';
 import {
   describeShareMode,
   decodeShareSnapshot,
@@ -28,16 +30,10 @@ export function SharedResultPage() {
           was edited. Nothing was changed in this browser.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link
-            className="inline-flex rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-transform hover:-translate-y-0.5"
-            to="/"
-          >
+          <Link className={buttonStyles({ variant: 'primary' })} to="/">
             Open the bench
           </Link>
-          <Link
-            className="inline-flex rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong"
-            to="/history"
-          >
+          <Link className={buttonStyles()} to="/history">
             Local history
           </Link>
         </div>
@@ -65,17 +61,13 @@ export function SharedResultPage() {
       </p>
 
       <div className="mt-8 flex flex-wrap items-end justify-between gap-6 border-y border-line/80 py-6">
-        <div>
-          <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">
-            Net WPM
-          </p>
-          <p
-            className="font-mono text-6xl leading-none tabular-nums text-ink"
-            data-testid="shared-net-wpm"
-          >
-            {snapshot.netWpm.toFixed(1)}
-          </p>
-        </div>
+        <dl>
+          <HeroStat
+            label="Net WPM"
+            value={snapshot.netWpm.toFixed(1)}
+            valueTestId="shared-net-wpm"
+          />
+        </dl>
         <p className="max-w-sm text-sm leading-6 text-ink-muted">
           {snapshot.excluded
             ? snapshot.mode === 'custom'
@@ -114,30 +106,13 @@ export function SharedResultPage() {
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <Link
-          className="inline-flex rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-transform hover:-translate-y-0.5"
-          to="/"
-        >
+        <Link className={buttonStyles({ variant: 'primary' })} to="/">
           Run your own test
         </Link>
-        <Link
-          className="inline-flex rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong"
-          to="/history"
-        >
+        <Link className={buttonStyles()} to="/history">
           Local history
         </Link>
       </div>
     </section>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">
-        {label}
-      </dt>
-      <dd className="mt-1 font-mono text-xl tabular-nums text-ink">{value}</dd>
-    </div>
   );
 }

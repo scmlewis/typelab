@@ -1,5 +1,7 @@
 import { Link } from 'react-router';
 
+import { Card } from '@/components/ui/Card';
+import { buttonStyles } from '@/components/ui/styles';
 import { TypingTest } from '@/features/typing/TypingTest';
 import { useSettings } from '@/features/settings/settingsContext';
 
@@ -28,14 +30,11 @@ export function HomePage() {
         </div>
 
         {status === 'loading' ? (
-          <div
-            aria-busy="true"
-            className="mt-6 rounded-card border border-line bg-surface p-8 shadow-card sm:mt-8"
-          >
+          <Card aria-busy="true" className="mt-6 sm:mt-8" padding="roomy">
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-ink-muted">
               Preparing the bench…
             </p>
-          </div>
+          </Card>
         ) : (
           <TypingTest />
         )}
@@ -51,10 +50,7 @@ export function HomePage() {
               Built for practice, not accounts.
             </h2>
           </div>
-          <Link
-            className="rounded-full border border-line px-4 py-2 text-sm text-ink transition-colors hover:border-ink"
-            to="/about"
-          >
+          <Link className={buttonStyles()} to="/about">
             Read the field notes →
           </Link>
         </div>
