@@ -145,4 +145,28 @@ describe('test toolbar quote mode', () => {
     expect(screen.queryByRole('group', { name: 'Duration' })).not.toBeInTheDocument();
     expect(screen.queryByRole('group', { name: 'Word count' })).not.toBeInTheDocument();
   });
+
+  it('disables every control during a run and keeps the active mode pressed', () => {
+    render(
+      <TestToolbar
+        config={DEFAULT_TIMED_CONFIG}
+        disabled
+        onChange={() => {}}
+        onCustomText={() => {}}
+        onRestart={() => {}}
+      />,
+    );
+
+    for (const button of screen.getAllByRole('button')) {
+      if (button.getAttribute('aria-label') === 'Restart test') {
+        continue;
+      }
+
+      expect(button).toBeDisabled();
+    }
+
+    expect(screen.getByRole('button', { name: 'Restart test' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Time' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByLabelText('Vocabulary')).toBeDisabled();
+  });
 });

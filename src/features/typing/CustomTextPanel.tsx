@@ -1,5 +1,9 @@
 import { useState } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import { Textarea } from '@/components/ui/controls';
+import { Overline } from '@/components/ui/Overline';
+import { StatusMessage } from '@/components/ui/StatusMessage';
 import { CUSTOM_TEXT_MAX_LENGTH } from '@/engine/config';
 import { normalizeCustomText } from '@/engine/prompt';
 
@@ -36,12 +40,10 @@ export function CustomTextPanel({ initialText, onStart, onCancel }: CustomTextPa
       </p>
 
       <label className="mt-5 block" htmlFor="custom-text-input">
-        <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">
-          Custom text
-        </span>
-        <textarea
+        <Overline>Custom text</Overline>
+        <Textarea
           autoFocus
-          className="mt-2 min-h-40 w-full resize-y rounded-xl border border-line bg-paper px-4 py-3 font-mono text-sm leading-6 text-ink outline-none focus-visible:border-focus focus-visible:ring-2 focus-visible:ring-focus/30"
+          className="mt-2 min-h-40 resize-y font-mono leading-6"
           id="custom-text-input"
           onChange={(event) => {
             setDraft(event.target.value);
@@ -57,33 +59,23 @@ export function CustomTextPanel({ initialText, onStart, onCancel }: CustomTextPa
           {normalized.length.toLocaleString('en-US')} / {limit} characters
         </p>
         <div className="flex flex-wrap gap-2">
-          <button
-            className="rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong"
-            onClick={onCancel}
-            type="button"
-          >
-            Cancel
-          </button>
-          <button
-            className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+          <Button onClick={onCancel}>Cancel</Button>
+          <Button
             disabled={!canStart}
             onClick={() => {
               onStart(normalized);
             }}
-            type="button"
+            variant="primary"
           >
             Start custom test
-          </button>
+          </Button>
         </div>
       </div>
 
       {tooLong ? (
-        <p
-          className="mt-3 rounded-xl border border-danger/30 bg-danger/5 px-4 py-3 text-xs leading-5 text-danger"
-          role="alert"
-        >
+        <StatusMessage className="mt-3" tone="error">
           Custom text must be {limit} characters or fewer.
-        </p>
+        </StatusMessage>
       ) : null}
     </section>
   );

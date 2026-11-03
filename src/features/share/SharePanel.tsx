@@ -1,6 +1,11 @@
 import { useMemo, useRef, useState } from 'react';
 import { Copy, Download, Link2 } from 'lucide-react';
 
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/controls';
+import { Overline } from '@/components/ui/Overline';
+import { StatusMessage } from '@/components/ui/StatusMessage';
 import type { TestResult } from '@/engine/types';
 import { downloadBlob } from '@/features/history/download';
 import { copyText } from '@/features/share/clipboard';
@@ -78,25 +83,15 @@ export function SharePanel({ result, origin, headingLevel = 3 }: SharePanelProps
   }
 
   return (
-    <section
-      aria-labelledby="share-title"
-      className="mt-8 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
-      data-testid="share-panel"
-    >
+    <Card as="section" aria-labelledby="share-title" className="mt-8" data-testid="share-panel">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-accent">
-            Share / snapshot
-          </p>
+          <Overline tone="accent">Share / snapshot</Overline>
           <Heading className="mt-1 font-display text-2xl tracking-tight" id="share-title">
             Take this run with you.
           </Heading>
         </div>
-        {snapshot.excluded ? (
-          <p className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-ink-muted">
-            Unranked run
-          </p>
-        ) : null}
+        {snapshot.excluded ? <Overline>Unranked run</Overline> : null}
       </div>
 
       <p className="mt-2 max-w-xl text-sm leading-6 text-ink-muted">
@@ -105,51 +100,38 @@ export function SharePanel({ result, origin, headingLevel = 3 }: SharePanelProps
       </p>
 
       <div className="mt-5 flex flex-wrap gap-3">
-        <button
-          className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong"
-          onClick={() => void copySummary()}
-          type="button"
-        >
+        <Button onClick={() => void copySummary()}>
           <Copy aria-hidden="true" size={15} />
           Copy summary
-        </button>
-        <button
-          className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong disabled:cursor-wait disabled:opacity-60"
-          disabled={busy}
-          onClick={() => void downloadCard()}
-          type="button"
-        >
+        </Button>
+        <Button disabled={busy} onClick={() => void downloadCard()}>
           <Download aria-hidden="true" size={15} />
           {busy ? 'Drawing card…' : 'Download image card'}
-        </button>
+        </Button>
       </div>
 
       <div className="mt-5">
-        <label
-          className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted"
-          htmlFor="share-link"
-        >
-          Share link
+        <label className="block" htmlFor="share-link">
+          <Overline>Share link</Overline>
         </label>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-          <input
+          <Input
             aria-describedby={link === null ? 'share-link-note' : undefined}
-            className="min-w-0 flex-1 rounded-full border border-line bg-paper px-4 py-2 font-mono text-xs text-ink-muted focus:text-ink"
+            className="min-w-0 flex-1"
+            density="sm"
             id="share-link"
+            placeholder={link === null ? 'Link unavailable for this run' : undefined}
             readOnly
             value={link ?? ''}
-            placeholder={link === null ? 'Link unavailable for this run' : undefined}
           />
-          <button
+          <Button
             aria-describedby={link === null ? 'share-link-note' : undefined}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-strong disabled:cursor-not-allowed disabled:opacity-60"
             disabled={link === null}
             onClick={() => void copyLink()}
-            type="button"
           >
             <Link2 aria-hidden="true" size={15} />
             Copy link
-          </button>
+          </Button>
         </div>
         {link === null ? (
           <p className="mt-2 text-xs leading-5 text-ink-muted" id="share-link-note">
@@ -162,15 +144,19 @@ export function SharePanel({ result, origin, headingLevel = 3 }: SharePanelProps
         <summary className="cursor-pointer text-xs font-medium text-ink-muted">
           Preview the text summary
         </summary>
-        <pre className="mt-2 whitespace-pre-wrap break-words rounded-xl bg-paper px-4 py-3 font-mono text-xs leading-5 text-ink-muted">
+        <pre className="mt-2 whitespace-pre-wrap break-words rounded-control bg-paper px-4 py-3 font-mono text-xs leading-5 text-ink-muted">
           {summary}
         </pre>
       </details>
 
-      <p className="mt-3 min-h-5 text-xs leading-5 text-ink-muted" role="status">
+      <StatusMessage
+        className="mt-3 min-h-5"
+        tone={status.kind === 'error' ? 'error' : 'info'}
+        variant="plain"
+      >
         {statusMessage(status)}
-      </p>
-    </section>
+      </StatusMessage>
+    </Card>
   );
 }
 

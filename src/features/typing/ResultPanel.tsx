@@ -1,5 +1,8 @@
 import { ArrowRight, Repeat2 } from 'lucide-react';
 
+import { Button } from '@/components/ui/Button';
+import { HeroStat, Metric } from '@/components/ui/Metric';
+import { StatusMessage } from '@/components/ui/StatusMessage';
 import { getQuoteById } from '@/engine/content/quotes';
 import type { EngineStatus, TestResult } from '@/engine/types';
 import { SharePanel } from '@/features/share/SharePanel';
@@ -46,20 +49,14 @@ export function ResultPanel({ result, status, onNext, onRepeat }: ResultPanelPro
         </div>
 
         {result ? (
-          <div className="sm:text-right">
-            <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">
-              Net WPM
-            </p>
-            <p
-              className="font-mono text-6xl leading-none tabular-nums text-ink"
-              data-testid="result-net-wpm"
-            >
-              {result.netWpm.toFixed(0)}
-            </p>
-            <p className="mt-2 font-mono text-sm text-ink-muted">
-              {formatPercent(result.accuracy, 1)} accuracy
-            </p>
-          </div>
+          <dl className="sm:text-right">
+            <HeroStat
+              caption={`${formatPercent(result.accuracy, 1)} accuracy`}
+              label="Net WPM"
+              value={result.netWpm.toFixed(0)}
+              valueTestId="result-net-wpm"
+            />
+          </dl>
         ) : null}
       </div>
 
@@ -73,16 +70,16 @@ export function ResultPanel({ result, status, onNext, onRepeat }: ResultPanelPro
           </dl>
 
           <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-line/70 pt-5 sm:grid-cols-4">
-            <SmallMetric label="Correct" value={result.characterStatistics.correct} />
-            <SmallMetric label="Incorrect" value={result.characterStatistics.incorrect} />
-            <SmallMetric label="Extra" value={result.characterStatistics.extra} />
-            <SmallMetric label="Missed" value={result.characterStatistics.missed} />
+            <Metric label="Correct" size="sm" value={result.characterStatistics.correct} />
+            <Metric label="Incorrect" size="sm" value={result.characterStatistics.incorrect} />
+            <Metric label="Extra" size="sm" value={result.characterStatistics.extra} />
+            <Metric label="Missed" size="sm" value={result.characterStatistics.missed} />
           </dl>
 
           {result.flags.length > 0 ? (
-            <p className="mt-6 rounded-xl bg-accent-soft/60 px-4 py-3 text-xs leading-5 text-ink-muted">
+            <StatusMessage className="mt-6" tone="info">
               {describeFlags(result.flags)}
-            </p>
+            </StatusMessage>
           ) : null}
 
           {quote ? (
@@ -97,22 +94,14 @@ export function ResultPanel({ result, status, onNext, onRepeat }: ResultPanelPro
       ) : null}
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
-        <button
-          className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper transition-transform hover:-translate-y-0.5"
-          onClick={onNext}
-          type="button"
-        >
+        <Button onClick={onNext} size="lg" variant="primary">
           Next test
           <ArrowRight aria-hidden="true" size={15} />
-        </button>
-        <button
-          className="inline-flex items-center gap-2 rounded-full border border-line px-5 py-2.5 text-sm font-medium transition-colors hover:bg-surface-strong"
-          onClick={onRepeat}
-          type="button"
-        >
+        </Button>
+        <Button onClick={onRepeat} size="lg">
           <Repeat2 aria-hidden="true" size={15} />
           Repeat text
-        </button>
+        </Button>
         <span className="text-xs text-ink-muted">
           or press <kbd className="font-mono text-ink">Ctrl</kbd> +{' '}
           <kbd className="font-mono text-ink">Enter</kbd>
@@ -121,26 +110,6 @@ export function ResultPanel({ result, status, onNext, onRepeat }: ResultPanelPro
 
       {result ? <SharePanel result={result} /> : null}
     </section>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ink-muted">
-        {label}
-      </dt>
-      <dd className="mt-1 font-mono text-xl tabular-nums text-ink">{value}</dd>
-    </div>
-  );
-}
-
-function SmallMetric({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3 sm:block">
-      <dt className="text-xs text-ink-muted">{label}</dt>
-      <dd className="font-mono text-sm tabular-nums text-ink sm:mt-1">{value}</dd>
-    </div>
   );
 }
 

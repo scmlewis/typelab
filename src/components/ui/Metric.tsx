@@ -57,7 +57,7 @@ export function HeroStat({ label, value, caption, valueTestId, className }: Hero
       >
         {value}
       </dd>
-      {caption ? <dd className="mt-2 text-sm text-ink-muted">{caption}</dd> : null}
+      {caption ? <dd className="mt-2 font-mono text-sm text-ink-muted">{caption}</dd> : null}
     </div>
   );
 }
