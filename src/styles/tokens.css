@@ -49,5 +49,6 @@
   --font-mono: var(--font-code);
   --font-display: var(--font-editorial);
   --radius-card: 1.25rem;
+  --radius-control: 0.75rem;
   --shadow-card: var(--elevation-card);
 }

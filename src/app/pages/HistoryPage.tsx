@@ -289,9 +289,11 @@ export function HistoryPage({ repository }: HistoryPageProps) {
                   </p>
                 ) : null}
               </div>
-              <Metric label="Net WPM" value={result.netWpm.toFixed(1)} />
-              <Metric label="Accuracy" value={formatPercent(result.accuracy, 1)} />
-              <Metric label="Consistency" value={formatPercent(result.consistency, 1)} />
+              <dl className="grid gap-3 sm:col-span-3 sm:grid-cols-subgrid sm:items-center">
+                <Metric label="Net WPM" value={result.netWpm.toFixed(1)} />
+                <Metric label="Accuracy" value={formatPercent(result.accuracy, 1)} />
+                <Metric label="Consistency" value={formatPercent(result.consistency, 1)} />
+              </dl>
               <Button
                 aria-label={`Delete run from ${formatTimestamp(result.completedAt)}`}
                 className="justify-self-start text-ink-muted hover:border-danger/40 hover:text-danger sm:justify-self-end"
